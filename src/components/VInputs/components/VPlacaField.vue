@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineModel, watch, computed } from 'vue'
+import { defineModel, watch, computed , defineProps} from 'vue'
 
 const model = defineModel<string>('model')
 

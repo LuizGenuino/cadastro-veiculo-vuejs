@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineModel, ref, computed, defineProps } from 'vue'
+import { defineModel, ref, defineProps } from 'vue'
 import VPlacaField from '../components/VPlacaField.vue'
 import VChassiField from '../components/VChassiField.vue'
 
