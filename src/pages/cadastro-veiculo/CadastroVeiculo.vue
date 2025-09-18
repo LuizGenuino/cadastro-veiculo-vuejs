@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { CadastroVeiculoType } from '../../utils/types'
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const form = reactive<CadastroVeiculoType>({
     placa_ou_chassi: '',
@@ -20,6 +23,10 @@ function onSubmit() {
     console.log('Formulário enviado!', { ...form })
     loading.value = true
     setTimeout(() => (loading.value = false), 2000)
+    const veiculo = JSON.stringify([{...form, uid: '1'}, {...form, uid: '2'}, {...form, uid: '3'}]);
+    const token = '123';
+    router.push({ path: `/selecionar-veiculo/${token}`, query: { veiculo } });
+
 }
 function required(v: string) {
     return !!v || 'Campo obrigatório'

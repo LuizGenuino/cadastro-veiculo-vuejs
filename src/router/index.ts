@@ -8,12 +8,14 @@
 import { createRouter, createWebHistory } from 'vue-router/auto'
 import { CadastroVeiculoRoute } from '@/pages/cadastro-veiculo/route'
 import { NotFoundRoute } from '@/pages/not-found-page/route'
+import { SelecionarVeiculoRoute } from '@/pages/selecionar-veiculo/route'
 
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         CadastroVeiculoRoute,
+        SelecionarVeiculoRoute,
         // Not Found route should be the last one
         NotFoundRoute
     ],
