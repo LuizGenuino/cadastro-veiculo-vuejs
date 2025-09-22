@@ -9,6 +9,9 @@ import { createRouter, createWebHistory } from 'vue-router/auto'
 import { CadastroVeiculoRoute } from '@/pages/cadastro-veiculo/route'
 import { NotFoundRoute } from '@/pages/not-found-page/route'
 import { SelecionarVeiculoRoute } from '@/pages/selecionar-veiculo/route'
+import { InformacaoVeiculoRoute } from '@/pages/informacao-veiculo/route'
+import { ImagensVeiculoRoute } from '@/pages/imagens-veiculo/route'
+import { ImagensOpcionaisVeiculoRoute } from '@/pages/imagens-opcionais-veiculo/route'
 
 
 const router = createRouter({
@@ -16,6 +19,9 @@ const router = createRouter({
     routes: [
         CadastroVeiculoRoute,
         SelecionarVeiculoRoute,
+        InformacaoVeiculoRoute,
+        ImagensVeiculoRoute,
+        ImagensOpcionaisVeiculoRoute,
         // Not Found route should be the last one
         NotFoundRoute
     ],
