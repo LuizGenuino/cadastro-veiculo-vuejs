@@ -9,7 +9,8 @@ const props = defineProps({
     loading: { type: Boolean, default: false },
     prefix: { type: String, default: '' },
     suffix: { type: String, default: '' },
-    currency: { type: Boolean, default: false}
+    currency: { type: Boolean, default: false},
+    hint: {type: String, default: ''},
 })
 
 const rules = {
@@ -52,7 +53,8 @@ watch(model, (newValue) => {
 <template>
     <div class="mx-100">
         <v-text-field v-model:model-value="model" :rules="validationRules" :label="props.label" variant="outlined"
-            :readonly="props.loading" :loading="props.loading" maxlength="9" :prefix="props.prefix" :suffix="props.suffix" :prepend-inner-icon="currency?'mdi-cash' : 'mdi-speedometer'">
+            :readonly="props.loading" :loading="props.loading" maxlength="9" :prefix="props.prefix" :suffix="props.suffix" 
+            :prepend-inner-icon="currency?'mdi-cash' : 'mdi-speedometer'" :hint="props.hint" persistent-hint>
             <template #append-inner>
                 <slot name="append-inner">
                 </slot>

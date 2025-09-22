@@ -2,9 +2,16 @@ export type SnackbarType = (message: string, color: 'success' | 'error' | 'info'
 
 export type CadastroVeiculoType = {
     uid?: string | null;
+    loja_usuario: string;
     placa_ou_chassi: string;
     nome_proprietario: string;
     telefone_proprietario: string;
+    id_veiculo_fipe: string;
+    placa: string;
+    marca: string;
+    modelo: string;
+    ano: string;
+    valor_fipe: string;
 }
 
 export interface VeiculoType {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { PERGUNTAS, type FormStateType, type SnackbarType } from '@/utils/types';
-import { ref, reactive, computed, inject } from 'vue'
-import { useRouter } from 'vue-router'
+import { PERGUNTAS, type CadastroVeiculoType, type FormStateType, type SnackbarType } from '@/utils/types';
+import { ref, reactive, computed, inject, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
 
 const ESTADOS_CONSERVACAO = [
@@ -18,6 +18,21 @@ const MOTIVOS_VENDA = [
 
 const showSnackbar = inject<SnackbarType>('snackbar', () => { });
 const router = useRouter();
+const route = useRoute();
+
+const form = ref<CadastroVeiculoType>({
+    loja_usuario: '',
+    placa_ou_chassi: '',
+    nome_proprietario: '',
+    telefone_proprietario: '',
+    marca: '',
+    modelo: '',
+    ano: '',
+    valor_fipe: '',
+    placa: '',
+    id_veiculo_fipe: '',
+});
+
 
 const formState = reactive<FormStateType>({
     valorDesejado: null,
@@ -76,31 +91,36 @@ async function onSubmit() {
         isLoading.value = false;
     }
 }
+
+onMounted(() => {
+    console.log(route.query.veiculo);
+    form.value = JSON.parse(route.query.veiculo as string);
+});
 </script>
 
 <template>
     <v-form-card v-model:formVerification="isBasicFormValid" :loading="isLoading" card-title="CADASTRO DE VEÍCULO"
-        card-subtitle="Complete os dados adicionais" submit-text="Proximo"
-        :is-submit-disabled="!isFormCompletelyValid" @submit.prevent="onSubmit">
+        card-subtitle="Complete os dados adicionais" submit-text="Proximo" :is-submit-disabled="!isFormCompletelyValid"
+        @submit.prevent="onSubmit">
         <v-card-subtitle class="page-subtitle text-center mb-6">passo 2 de 4</v-card-subtitle>
         <v-row>
-            <v-col cols="12" md="6">
+            <v-col cols="12">
                 <v-currency-field v-model.number="formState.valorDesejado" :readonly="isLoading" label="VALOR DESEJADO*"
-                    required prefix="R$" currency/>
+                    required prefix="R$" currency :hint="`Valor Fipe ${form.valor_fipe}`" />
             </v-col>
 
-            <v-col cols="12" md="6">
+            <v-col cols="12">
                 <v-currency-field v-model.number="formState.kmRodado" :readonly="isLoading" label="KM RODADO*"
                     suffix="KM" required />
             </v-col>
 
-            <v-col cols="12" md="6">
+            <v-col cols="12">
                 <v-select v-model="formState.estadoConservacao" label="ESTADO DE CONSERVAÇÃO*"
                     :items="ESTADOS_CONSERVACAO" variant="outlined" :readonly="isLoading"
                     :rules="[validators.required]" />
             </v-col>
 
-            <v-col cols="12" md="6">
+            <v-col cols="12">
                 <v-select v-model="formState.motivoVenda" label="MOTIVO DA VENDA*" :items="MOTIVOS_VENDA"
                     :readonly="isLoading" :rules="[validators.required]" variant="outlined" />
             </v-col>

@@ -17,6 +17,7 @@ const props = defineProps({
 
 function toggleType() {
     internalType.value = internalType.value === 'placa' ? 'chassi' : 'placa'
+    model.value = ''
 }
 
 </script>
