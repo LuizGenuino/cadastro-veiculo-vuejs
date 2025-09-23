@@ -39,7 +39,7 @@ watch(model, (newValue) => {
     }
     
     if (newValue !== maskedValue) {
-        console.log('mask', maskedValue);
+        model.value = maskedValue;
     }
 });
 

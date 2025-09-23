@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { SnackbarType } from '@/utils/types';
+import type { CadastroVeiculoType, SnackbarType } from '@/utils/types';
 import { ref, computed, onUnmounted, watch, inject } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 
 type PhotoKey = keyof typeof FOTOS_OBRIGATORIAS;
@@ -14,6 +14,7 @@ interface PhotoData {
 
 
 const router = useRouter();
+const route = useRoute();
 
 const FOTOS_OBRIGATORIAS = {
     painel: { titulo: 'Painel', icon: 'mdi-speedometer', class: "" },
@@ -21,6 +22,23 @@ const FOTOS_OBRIGATORIAS = {
     lateralDireita: { titulo: 'Lateral Direita', icon: 'mdi-motorbike', class: "mdi-flip-h" },
     documento: { titulo: 'Documento', icon: 'mdi-file-document', class: "" }
 } as const;
+
+const form = ref<CadastroVeiculoType>({
+    loja_usuario: '',
+    placa_ou_chassi: '',
+    nome_proprietario: '',
+    telefone_proprietario: '',
+    marca: '',
+    modelo: '',
+    ano: '',
+    valor_fipe: '',
+    placa: '',
+    id_veiculo_fipe: '',
+    valorDesejado: 0,
+    kmRodado: 0,
+    estadoConservacao: "",
+    motivoVenda: "",
+});
 
 
 const showSnackbar = inject<SnackbarType>('snackbar', () => { });
@@ -132,11 +150,15 @@ const onSubmit = () => {
     showSnackbar('Cadastro enviado com sucesso!', 'success');
     setTimeout(() => isLoading.value = false, 2000);
     const token = '123';
+    const veiculo = JSON.stringify({ ...form.value });
 
-    router.push({ path: `/imagens-opcionais/${token}` });
+    router.push({ path: `/imagens-opcionais/${token}`, query: { veiculo }, replace: true });
 
 }
 
+onMounted(() => {
+    form.value = JSON.parse(route.query.veiculo as string);
+});
 
 onUnmounted(() => {
     Object.values(fotos.value).forEach(photo => {

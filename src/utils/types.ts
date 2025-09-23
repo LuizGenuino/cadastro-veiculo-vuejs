@@ -12,6 +12,10 @@ export type CadastroVeiculoType = {
     modelo: string;
     ano: string;
     valor_fipe: string;
+    valorDesejado?: number;
+    kmRodado?: number;
+    estadoConservacao?: string;
+    motivoVenda?: string;
 }
 
 export interface VeiculoType {

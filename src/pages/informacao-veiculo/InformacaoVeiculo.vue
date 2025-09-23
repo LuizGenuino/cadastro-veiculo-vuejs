@@ -31,6 +31,10 @@ const form = ref<CadastroVeiculoType>({
     valor_fipe: '',
     placa: '',
     id_veiculo_fipe: '',
+    valorDesejado: 0,
+    kmRodado: 0,
+    estadoConservacao: "",
+    motivoVenda: "",
 });
 
 
@@ -75,12 +79,23 @@ async function onSubmit() {
 
     isLoading.value = true;
     try {
+        // Adiciona todos os itens de formState exceto o checklist
+        const { checklist, ...formStateWithoutChecklist } = formState;
+        // Garante que valorDesejado e kmRodado não sejam null
+        const safeFormState = {
+            ...formStateWithoutChecklist,
+            valorDesejado: formState.valorDesejado ?? 0,
+            kmRodado: formState.kmRodado ?? 0,
+        };
+        form.value = { ...form.value, ...safeFormState };
         await new Promise(resolve => setTimeout(resolve, 1500));
         showSnackbar('Informações salvas com sucesso!', 'success');
 
+        const veiculo = JSON.stringify({ ...form.value });
+
         const token = '123';
 
-        router.push({ path: `/imagens-veiculo/${token}` });
+        router.push({ path: `/imagens-veiculo/${token}`, query: { veiculo }, replace: true });
 
     } catch (error) {
         console.error("Erro ao salvar informações:", error);
