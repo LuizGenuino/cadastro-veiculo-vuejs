@@ -76,8 +76,6 @@ async function onSubmit() {
     isLoading.value = true;
     try {
         await new Promise(resolve => setTimeout(resolve, 1500));
-
-        console.log('Dados a serem salvos:', formState);
         showSnackbar('Informações salvas com sucesso!', 'success');
 
         const token = '123';
@@ -93,7 +91,6 @@ async function onSubmit() {
 }
 
 onMounted(() => {
-    console.log(route.query.veiculo);
     form.value = JSON.parse(route.query.veiculo as string);
 });
 </script>

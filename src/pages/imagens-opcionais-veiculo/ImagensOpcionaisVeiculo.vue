@@ -33,8 +33,8 @@ const uploadProgress = ref<Partial<Record<PhotoKey, number>>>({});
 
 
 const isModalVisible = ref(false);
+const isSuccessModalVisible = ref(false)
 const selectedPhotoKey = ref<PhotoKey | null>(null);
-const zoomLevel = ref(1);
 
 
 const isLoading = ref(false);
@@ -63,6 +63,12 @@ const triggerFileInput = (key: PhotoKey) => {
     fileInputRef.value?.click();
 }
 
+function handlePhotoUpdate(key: PhotoKey, newPhotoData: PhotoData) {
+    if (fotos.value[key]) {
+        fotos.value[key] = newPhotoData;
+    }
+}
+
 
 const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -86,6 +92,7 @@ const handleFileSelect = async (event: Event) => {
             url: URL.createObjectURL(file)
         };
         showSnackbar('Foto adicionada com sucesso!', 'success');
+        openPhotoModal(key)
 
     } catch (error) {
         console.error("Erro no upload da foto:", error);
@@ -109,7 +116,6 @@ const removePhoto = (key: PhotoKey) => {
 
 const openPhotoModal = (key: PhotoKey) => {
     selectedPhotoKey.value = key;
-    zoomLevel.value = 1; 
     isModalVisible.value = true;
 }
 
@@ -123,7 +129,7 @@ const onSubmit = () => {
     console.log('Enviando fotos:', fotos.value);
     showSnackbar('Cadastro enviado com sucesso!', 'success');
     setTimeout(() => isLoading.value = false, 2000); 
-
+    isSuccessModalVisible.value = true
 }
 
 onUnmounted(() => {
@@ -174,10 +180,10 @@ onUnmounted(() => {
             @change="handleFileSelect" />
     </v-form-card>
 
-    <v-image-dialog :fotos="fotos" v-model:isModalVisible="isModalVisible" :selectedPhotoKey="selectedPhotoKey"
-        :removePhoto="removePhoto" :titulo="FOTOS_OPCIONAIS[selectedPhotoKey || 'frente'].titulo" />
+    <v-image-dialog  v-if="selectedPhotoKey"  :foto="fotos[selectedPhotoKey]" v-model:isModalVisible="isModalVisible" :selectedPhotoKey="selectedPhotoKey"
+        :removePhoto="removePhoto" :titulo="FOTOS_OPCIONAIS[selectedPhotoKey].titulo"  @update:photo="handlePhotoUpdate" />
 
-    <SuccessDialog :is-modal-visible="true" ></SuccessDialog>
+    <SuccessDialog :is-modal-visible="isSuccessModalVisible" ></SuccessDialog>
 </template>
 
 <style scoped>

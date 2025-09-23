@@ -36,7 +36,6 @@ const uploadProgress = ref<Partial<Record<PhotoKey, number>>>({});
 
 const isModalVisible = ref(false);
 const selectedPhotoKey = ref<PhotoKey | null>(null);
-const zoomLevel = ref(1);
 
 
 const isLoading = ref(false);
@@ -65,6 +64,11 @@ const triggerFileInput = (key: PhotoKey) => {
     fileInputRef.value?.click();
 }
 
+function handlePhotoUpdate(key: PhotoKey, newPhotoData: PhotoData) {
+    if (fotos.value[key]) {
+        fotos.value[key] = newPhotoData;
+    }
+}
 
 const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -87,7 +91,9 @@ const handleFileSelect = async (event: Event) => {
             file,
             url: URL.createObjectURL(file)
         };
+
         showSnackbar('Foto adicionada com sucesso!', 'success');
+        openPhotoModal(key)
 
     } catch (error) {
         console.error("Erro no upload da foto:", error);
@@ -112,7 +118,6 @@ const removePhoto = (key: PhotoKey) => {
 // Métodos do Modal
 const openPhotoModal = (key: PhotoKey) => {
     selectedPhotoKey.value = key;
-    zoomLevel.value = 1;
     isModalVisible.value = true;
 }
 
@@ -180,8 +185,9 @@ onUnmounted(() => {
             @change="handleFileSelect" />
     </v-form-card>
 
-    <v-image-dialog :fotos="fotos" v-model:isModalVisible="isModalVisible" :selectedPhotoKey="selectedPhotoKey"
-        :removePhoto="removePhoto" :titulo="FOTOS_OBRIGATORIAS[selectedPhotoKey || 'painel'].titulo" />
+    <v-image-dialog v-if="selectedPhotoKey" :foto="fotos[selectedPhotoKey]" v-model:isModalVisible="isModalVisible" :selectedPhotoKey="selectedPhotoKey"
+        :removePhoto="removePhoto" :titulo="FOTOS_OBRIGATORIAS[selectedPhotoKey].titulo"
+        @update:photo="handlePhotoUpdate" />
 </template>
 
 <style scoped>

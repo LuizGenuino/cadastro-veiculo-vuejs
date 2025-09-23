@@ -29,23 +29,17 @@ watch(model, (newValue) => {
     if (!newValue) return
     
     const digitos = newValue.replace(/\D/g, '');
-    console.log(digitos);
     
     let maskedValue = digitos;
     if (digitos.length > 3) {
-        // maskedValue = `${digitos.substring(0, digitos.length - 2)},${digitos.substring(digitos.length - 2)}`;
         maskedValue = `${digitos.substring(0, digitos.length - 3)}.${digitos.substring(digitos.length - 3)}`;
     }
      if (digitos.length > 6 ) {
-        // maskedValue = `${digitos.substring(0, digitos.length - 2)},${digitos.substring(digitos.length - 2)}`;
         maskedValue = `${digitos.substring(0, 1)}.${digitos.substring(1,4)}.${digitos.substring(4, 7)}`;
     }
-    console.log(maskedValue);
     
     if (newValue !== maskedValue) {
         console.log('mask', maskedValue);
-        
-        model.value = maskedValue;
     }
 });
 

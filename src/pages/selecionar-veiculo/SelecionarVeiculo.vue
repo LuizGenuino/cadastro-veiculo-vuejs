@@ -43,9 +43,6 @@ async function onSubmit() {
 
     isLoading.value = true;
     try {
-        console.log('Veículo selecionado:', veiculoSelecionado.value);
-        console.log('Veículo selecionado 2:', isVersionSelected.value);
-
         form.value = { ...form.value, ...veiculoSelecionado.value, id_veiculo_fipe: veiculoSelecionado.value.uid };
         console.log('Form atualizado:', form.value);
 
@@ -70,7 +67,6 @@ async function onSubmit() {
 
 
 onMounted(() => {
-    console.log(route.query.veiculo);
     form.value = JSON.parse(route.query.veiculo as string);
 });
 </script>
