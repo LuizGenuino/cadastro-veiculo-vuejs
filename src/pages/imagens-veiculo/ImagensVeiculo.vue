@@ -16,10 +16,10 @@ interface PhotoData {
 const router = useRouter();
 
 const FOTOS_OBRIGATORIAS = {
-    painel: { titulo: 'Painel', icon: 'mdi-speedometer' },
-    lateralEsquerda: { titulo: 'Lateral Esquerda', icon: 'mdi-motorbike' },
-    lateralDireita: { titulo: 'Lateral Direita', icon: 'mdi-motorbike' },
-    documento: { titulo: 'Documento', icon: 'mdi-file-document' }
+    painel: { titulo: 'Painel', icon: 'mdi-speedometer', class: "" },
+    lateralEsquerda: { titulo: 'Lateral Esquerda', icon: 'mdi-motorbike', class: "" },
+    lateralDireita: { titulo: 'Lateral Direita', icon: 'mdi-motorbike', class: "mdi-flip-h" },
+    documento: { titulo: 'Documento', icon: 'mdi-file-document', class: "" }
 } as const;
 
 
@@ -153,7 +153,7 @@ onUnmounted(() => {
                         <v-btn variant="text" height="100%" width="100%" @click="triggerFileInput(key)"
                             aria-label="Adicionar foto do painel">
                             <div>
-                                <v-icon :icon="fotoInfo.icon" size="48" color="primary" />
+                                <v-icon :icon="fotoInfo.icon" size="48" color="primary" :class="fotoInfo?.class" />
                                 <h4 class="mt-2 mb-1 text-primary">{{ fotoInfo.titulo }}</h4>
                                 <p class="text-caption text-medium-emphasis">Toque para adicionar</p>
                             </div>
@@ -226,8 +226,4 @@ onUnmounted(() => {
 .photo-preview:hover .photo-overlay {
     opacity: 1;
 }
-
-
-
-
 </style>

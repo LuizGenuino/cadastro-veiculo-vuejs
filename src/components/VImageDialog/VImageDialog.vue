@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps } from 'vue'
+import { ref, defineProps, defineModel } from 'vue'
 
 
 interface PhotoData {
@@ -17,20 +17,26 @@ const props = defineProps<{
     removePhoto: (key: any | null) => void;
 }>()
 
+const zoomLevel = ref<number>(1);
+const rotateLevel = ref<number>(0)
 
-const zoomLevel = ref(1);
 
 function updateZoom(factor: number) {
     const newZoom = zoomLevel.value + factor;
-    if (newZoom >= 0.5 && newZoom <= 3) {
+    if (newZoom >= 1 && newZoom <= 3) {
         zoomLevel.value = newZoom;
     }
+}
+
+function updateRotation(rotate: number) {
+    const newRotate = rotateLevel.value + rotate
+    rotateLevel.value = newRotate
 }
 
 </script>
 
 <template>
-    <v-dialog v-model="isModalVisible" max-width="95vw" max-height="90vh" class="pa-1">
+    <v-dialog v-model="isModalVisible" max-width="95vw" max-height="95vh" class="pa-1">
         <v-card v-if="props.selectedPhotoKey && fotos[props.selectedPhotoKey]">
             <v-card-title class="d-flex justify-space-between align-center">
                 <span>{{ props.titulo }}</span>
@@ -41,17 +47,19 @@ function updateZoom(factor: number) {
             <v-card-text class="pa-0">
                 <div class="modal-image-container">
                     <v-img :src="fotos[props.selectedPhotoKey]?.url" class="modal-image"
-                        :style="{ transform: `scale(${zoomLevel})` }" max-width="100%" max-height="calc(90vh - 150px)"
+                        :style="{ transform: `scale(${zoomLevel}) rotate(${rotateLevel}deg)`}" max-width="100%" max-height="calc(90vh - 150px)"
                         contain />
                 </div>
             </v-card-text>
             <v-divider />
 
             <v-card-actions class="justify-center">
-                <v-btn-toggle variant="outlined" divided>
-                    <v-btn icon="mdi-magnify-minus" @click="updateZoom(-0.2)" :disabled="zoomLevel <= 0.5" />
+                <v-btn-toggle>
+                    <v-btn icon="mdi-rotate-left" @click="updateRotation(-90)" />
+                    <v-btn icon="mdi-magnify-minus" @click="updateZoom(-0.2)" :disabled="zoomLevel <= 1" />
                     <v-btn icon="mdi-image-filter-center-focus" @click="zoomLevel = 1" />
                     <v-btn icon="mdi-magnify-plus" @click="updateZoom(0.2)" :disabled="zoomLevel >= 3" />
+                    <v-btn icon="mdi-rotate-right" @click="updateRotation(90)"/>
                 </v-btn-toggle>
                 <v-btn class="position-absolute right-0" icon="mdi-delete" color="error" variant="text"
                     @click.stop="removePhoto(props.selectedPhotoKey), isModalVisible = false"
@@ -61,13 +69,12 @@ function updateZoom(factor: number) {
     </v-dialog>
 </template>
 <style scoped>
-
 .modal-image-container {
     overflow: auto;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #212121;
+    background-color: #ffffff00;
 }
 
 .modal-image {
