@@ -1,4 +1,3 @@
-export type SnackbarType = (message: string, color: 'success' | 'error' | 'info' | 'warning') => void;
 
 export type CadastroVeiculoType = {
     uid?: string | null;
@@ -50,5 +49,5 @@ export interface FormStateType {
     kmRodado: number | null;
     estadoConservacao: string;
     motivoVenda: string;
-    checklist: Partial<Record<PerguntaKey, 'sim' | 'nao' | null>>;
+    checklist: Partial<Record<PerguntaKey, boolean | null>>;
 }

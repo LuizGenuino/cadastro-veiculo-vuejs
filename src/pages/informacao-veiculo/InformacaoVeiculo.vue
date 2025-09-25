@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { PERGUNTAS, type CadastroVeiculoType, type FormStateType, type SnackbarType } from '@/utils/types';
-import { ref, reactive, computed, inject, onMounted } from 'vue'
+import { useLoading } from '@/stores/loading';
+import { toast } from '@/utils/swal/toast';
+import { PERGUNTAS, type CadastroVeiculoType, type FormStateType } from '@/utils/types';
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 
@@ -15,8 +17,6 @@ const MOTIVOS_VENDA = [
 
 
 
-
-const showSnackbar = inject<SnackbarType>('snackbar', () => { });
 const router = useRouter();
 const route = useRoute();
 
@@ -45,7 +45,7 @@ const formState = reactive<FormStateType>({
     motivoVenda: '',
 
     checklist: PERGUNTAS.reduce((acc, pergunta) => {
-        acc[pergunta.key] = null;
+        acc[pergunta.key] = false;
         return acc;
     }, {} as FormStateType['checklist'])
 });
@@ -73,12 +73,13 @@ const isFormCompletelyValid = computed(() => {
 
 async function onSubmit() {
     if (!isFormCompletelyValid.value) {
-        showSnackbar('Por favor, preencha todos os campos e responda a todas as perguntas.', 'warning');
+        toast('Por favor, preencha todos os campos.', 'warning');
         return;
     }
 
     isLoading.value = true;
     try {
+        useLoading().show("Salvando Informações Extras...")
         // Adiciona todos os itens de formState exceto o checklist
         const { checklist, ...formStateWithoutChecklist } = formState;
         // Garante que valorDesejado e kmRodado não sejam null
@@ -89,17 +90,20 @@ async function onSubmit() {
         };
         form.value = { ...form.value, ...safeFormState };
         await new Promise(resolve => setTimeout(resolve, 1500));
-        showSnackbar('Informações salvas com sucesso!', 'success');
+        toast('Informações salvas com sucesso!', 'success');
 
         const veiculo = JSON.stringify({ ...form.value });
 
         const token = '123';
 
-        router.push({ path: `/imagens-veiculo/${token}`, query: { veiculo }, replace: true });
+        useLoading().hidden()
+
+
+        router.push({ path: `/imagens-veiculo/${token}`, query: { veiculo } });
 
     } catch (error) {
         console.error("Erro ao salvar informações:", error);
-        showSnackbar('Ocorreu um erro ao salvar os dados.', 'error');
+        toast('Ocorreu um erro ao salvar os dados.', 'error');
     } finally {
         isLoading.value = false;
     }
@@ -150,11 +154,11 @@ onMounted(() => {
                     <p class="question-text mb-3">{{ pergunta.texto }}</p>
                     <v-btn-toggle v-model="formState.checklist[pergunta.key]" variant="outlined" divided mandatory
                         class="w-100">
-                        <v-btn color="primary" value="sim" class="flex-grow-1">
+                        <v-btn color="primary" :value="true" class="flex-grow-1">
                             <v-icon start>mdi-check</v-icon>
                             Sim
                         </v-btn>
-                        <v-btn color="error" value="nao" class="flex-grow-1">
+                        <v-btn color="error" :value="false" class="flex-grow-1">
                             <v-icon start>mdi-close</v-icon>
                             Não
                         </v-btn>

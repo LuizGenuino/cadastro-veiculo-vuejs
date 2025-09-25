@@ -17,6 +17,7 @@ declare module 'vue' {
     VFormCard: typeof import('./components/VFormCard/VFormCard.vue')['default']
     VIdVehicleInput: typeof import('./components/VInputs/VIdVehicleInput/VIdVehicleInput.vue')['default']
     VImageDialog: typeof import('./components/VImageDialog/VImageDialog.vue')['default']
+    VLoading: typeof import('./components/VLoading/VLoading.vue')['default']
     VNumberField: typeof import('./components/VInputs/components/VCurrencyField.vue')['default']
     VPhoneField: typeof import('./components/VInputs/components/VPhoneField.vue')['default']
     VPlacaField: typeof import('./components/VInputs/components/VPlacaField.vue')['default']

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, reactive, inject } from 'vue'
 import { useRouter } from 'vue-router'
-import type { CadastroVeiculoType, SnackbarType } from '../../utils/types'
+import type { CadastroVeiculoType } from '../../utils/types'
+import { useLoading } from '@/stores/loading';
+import { toast } from '@/utils/swal/toast';
 
-const showSnackbar = inject<SnackbarType>('snackbar', () => { });
 const router = useRouter();
 
 const LOJAS = [
@@ -35,26 +36,27 @@ const validators = {
 
 async function onSubmit() {
     if (!isFormValid.value) {
-        showSnackbar('Por favor, preencha os campos obrigatórios.', 'warning');
+        toast('Por favor, preencha os campos obrigatórios.', 'warning');
         return;
     }
 
     isLoading.value = true;
     try {
+        useLoading().show("Cadastrando Veiculo...")
         await new Promise(resolve => setTimeout(resolve, 1500));
         const veiculo = JSON.stringify({ ...form });
 
         const token = '123';
 
 
-
-        showSnackbar('Veículo encontrado! Selecione a versão.', 'success')
+        useLoading().hidden()
+        toast('Veículo Cadastrado com Sucesso', 'success')
 
         router.push({ path: `/selecionar-veiculo/${token}`, query: { veiculo } });
 
     } catch (error) {
         console.error('Falha ao buscar veículo:', error);
-        showSnackbar('Não foi possível encontrar o veículo. Tente novamente.', 'error');
+        toast('Não foi possível encontrar o veículo. Tente novamente.', 'error');
     } finally {
         isLoading.value = false;
     }

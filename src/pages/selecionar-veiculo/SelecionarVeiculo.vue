@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { CadastroVeiculoType, SnackbarType, VeiculoType } from '@/utils/types';
+import { useLoading } from '@/stores/loading';
+import { toast } from '@/utils/swal/toast';
+import type { CadastroVeiculoType, VeiculoType } from '@/utils/types';
 import { ref, computed, onMounted, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
-
-const showSnackbar = inject<SnackbarType>('snackbar', () => { });
 const router = useRouter();
 const route = useRoute();
 
@@ -37,29 +37,32 @@ const isVersionSelected = computed(() => !!veiculoSelecionado.value);
 
 async function onSubmit() {
     if (!isVersionSelected.value || !veiculoSelecionado.value) {
-        showSnackbar('Por favor, selecione uma versão.', 'warning');
+        toast('Por favor, selecione uma versão.', 'warning');
         return;
     }
 
     isLoading.value = true;
     try {
+        useLoading().show("Salvando Escolha....")
         form.value = { ...form.value, ...veiculoSelecionado.value, id_veiculo_fipe: veiculoSelecionado.value.uid };
         console.log('Form atualizado:', form.value);
 
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        showSnackbar('Versão selecionada com sucesso!', 'success')
+        toast('Versão selecionada com sucesso!', 'success')
 
         const token = '123';
 
         const veiculo = JSON.stringify({ ...form.value });
+        useLoading().hidden()
 
-        router.push({ path: `/informacao-veiculo/${token}`, query: { veiculo }, replace: true });
+
+        router.push({ path: `/informacao-veiculo/${token}`, query: { veiculo }});
 
     } catch (error) {
-        console.error("Erro ao selecionar a versão:", error);
-        showSnackbar('Ocorreu um erro. Tente novamente.', 'error');
+        console.error("Erro ao selecionar a versão:", error); 
+        toast('Ocorreu um erro. Tente novamente.', 'error');
     } finally {
         isLoading.value = false;
     }

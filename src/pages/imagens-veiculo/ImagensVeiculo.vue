@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { CadastroVeiculoType, SnackbarType } from '@/utils/types';
+import { useLoading } from '@/stores/loading';
+import { toast } from '@/utils/swal/toast';
+import type { CadastroVeiculoType } from '@/utils/types';
 import { ref, computed, onUnmounted, watch, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -39,9 +41,6 @@ const form = ref<CadastroVeiculoType>({
     estadoConservacao: "",
     motivoVenda: "",
 });
-
-
-const showSnackbar = inject<SnackbarType>('snackbar', () => { });
 
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
@@ -110,12 +109,12 @@ const handleFileSelect = async (event: Event) => {
             url: URL.createObjectURL(file)
         };
 
-        showSnackbar('Foto adicionada com sucesso!', 'success');
+        toast('Foto adicionada com sucesso!', 'success');
         openPhotoModal(key)
 
     } catch (error) {
         console.error("Erro no upload da foto:", error);
-        showSnackbar('Erro ao adicionar a foto.', 'error');
+        toast('Erro ao adicionar a foto.', 'error');
     } finally {
         uploading.value[key] = false;
 
@@ -129,28 +128,31 @@ const removePhoto = (key: PhotoKey) => {
     if (photo) {
         URL.revokeObjectURL(photo.url);
         delete fotos.value[key];
-        showSnackbar('Foto removida.', 'info');
+        toast('Foto removida.', 'info');
     }
 }
 
-// Métodos do Modal
+
 const openPhotoModal = (key: PhotoKey) => {
     selectedPhotoKey.value = key;
     isModalVisible.value = true;
 }
 
 
-const onSubmit = () => {
+const onSubmit = async () => {
     if (!todasFotosEnviadas.value) {
-        showSnackbar('Por favor, adicione todas as fotos obrigatórias.', 'warning');
+        toast('Por favor, adicione todas as fotos obrigatórias.', 'warning');
         return;
     }
+    useLoading().show("Enviando Fotos Obrigatorias...")
     isLoading.value = true;
     console.log('Enviando fotos:', fotos.value);
-    showSnackbar('Cadastro enviado com sucesso!', 'success');
-    setTimeout(() => isLoading.value = false, 2000);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    toast('Cadastro enviado com sucesso!', 'success');
     const token = '123';
     const veiculo = JSON.stringify({ ...form.value });
+    useLoading().hidden()
+
 
     router.push({ path: `/imagens-opcionais/${token}`, query: { veiculo }, replace: true });
 
@@ -207,9 +209,9 @@ onUnmounted(() => {
             @change="handleFileSelect" />
     </v-form-card>
 
-    <v-image-dialog v-if="selectedPhotoKey" :foto="fotos[selectedPhotoKey]" v-model:isModalVisible="isModalVisible" :selectedPhotoKey="selectedPhotoKey"
-        :removePhoto="removePhoto" :titulo="FOTOS_OBRIGATORIAS[selectedPhotoKey].titulo"
-        @update:photo="handlePhotoUpdate" />
+    <v-image-dialog v-if="selectedPhotoKey" :foto="fotos[selectedPhotoKey]" v-model:isModalVisible="isModalVisible"
+        :selectedPhotoKey="selectedPhotoKey" :removePhoto="removePhoto"
+        :titulo="FOTOS_OBRIGATORIAS[selectedPhotoKey].titulo" @update:photo="handlePhotoUpdate" />
 </template>
 
 <style scoped>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { SnackbarType } from '@/utils/types';
 import { ref, computed, onUnmounted, watch, inject } from 'vue'
 
 import SuccessDialog from './components/SuccessDialog.vue';
+import { useLoading } from '@/stores/loading';
+import { toast } from '@/utils/swal/toast';
 
 type PhotoKey = keyof typeof FOTOS_OPCIONAIS;
 
@@ -20,9 +21,6 @@ const FOTOS_OPCIONAIS = {
     pneuDianteiro: { titulo: 'Pneu Dianteiro', icon: 'mdi-tire' },
     motor: { titulo: 'Motor', icon: 'mdi-engine' }
 } as const; 
-
-
-const showSnackbar = inject<SnackbarType>('snackbar', () => { }); 
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const fotos = ref<Partial<Record<PhotoKey, PhotoData>>>({});
@@ -91,12 +89,12 @@ const handleFileSelect = async (event: Event) => {
             file,
             url: URL.createObjectURL(file)
         };
-        showSnackbar('Foto adicionada com sucesso!', 'success');
+        toast('Foto adicionada com sucesso!', 'success');
         openPhotoModal(key)
 
     } catch (error) {
         console.error("Erro no upload da foto:", error);
-        showSnackbar('Erro ao adicionar a foto.', 'error');
+        toast('Erro ao adicionar a foto.', 'error');
     } finally {
         uploading.value[key] = false;
         target.value = '';
@@ -109,7 +107,7 @@ const removePhoto = (key: PhotoKey) => {
     if (photo) {
         URL.revokeObjectURL(photo.url); 
         delete fotos.value[key];
-        showSnackbar('Foto removida.', 'info');
+        toast('Foto removida.', 'info');
     }
 }
 
@@ -119,16 +117,19 @@ const openPhotoModal = (key: PhotoKey) => {
     isModalVisible.value = true;
 }
 
-const onSubmit = () => {
+const onSubmit = async() => {
     if (!todasFotosEnviadas.value) {
-        showSnackbar('Por favor, adicione todas as fotos opcionais.', 'warning');
+        toast('Por favor, adicione todas as fotos opcionais.', 'warning');
         return;
     }
+    useLoading().show("Enviando Fotos Opcionais...")
     isLoading.value = true;
+    
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
+    useLoading().hidden()
     console.log('Enviando fotos:', fotos.value);
-    showSnackbar('Cadastro enviado com sucesso!', 'success');
-    setTimeout(() => isLoading.value = false, 2000); 
+    toast('Cadastro enviado com sucesso!', 'success');
     isSuccessModalVisible.value = true
 }
 
