@@ -20,7 +20,7 @@ const FOTOS_OPCIONAIS = {
     pneuTraseiro: { titulo: 'Pneu Traseiro', icon: 'mdi-tire' },
     pneuDianteiro: { titulo: 'Pneu Dianteiro', icon: 'mdi-tire' },
     motor: { titulo: 'Motor', icon: 'mdi-engine' }
-} as const; 
+} as const;
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const fotos = ref<Partial<Record<PhotoKey, PhotoData>>>({});
@@ -36,6 +36,7 @@ const selectedPhotoKey = ref<PhotoKey | null>(null);
 
 
 const isLoading = ref(false);
+const isUploading = ref<boolean>(false);
 
 
 const formVerification = defineModel<boolean>('formVerification', { default: false });
@@ -77,6 +78,7 @@ const handleFileSelect = async (event: Event) => {
 
     uploading.value[key] = true;
     uploadProgress.value[key] = 0;
+    isUploading.value = true
 
     try {
 
@@ -95,8 +97,10 @@ const handleFileSelect = async (event: Event) => {
     } catch (error) {
         console.error("Erro no upload da foto:", error);
         toast('Erro ao adicionar a foto.', 'error');
+        isUploading.value = false
     } finally {
         uploading.value[key] = false;
+        isUploading.value = false
         target.value = '';
         target.removeAttribute('data-photo-key');
     }
@@ -105,7 +109,7 @@ const handleFileSelect = async (event: Event) => {
 const removePhoto = (key: PhotoKey) => {
     const photo = fotos.value[key];
     if (photo) {
-        URL.revokeObjectURL(photo.url); 
+        URL.revokeObjectURL(photo.url);
         delete fotos.value[key];
         toast('Foto removida.', 'info');
     }
@@ -117,14 +121,14 @@ const openPhotoModal = (key: PhotoKey) => {
     isModalVisible.value = true;
 }
 
-const onSubmit = async() => {
+const onSubmit = async () => {
     if (!todasFotosEnviadas.value) {
         toast('Por favor, adicione todas as fotos opcionais.', 'warning');
         return;
     }
     useLoading().show("Enviando Fotos Opcionais...")
     isLoading.value = true;
-    
+
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     useLoading().hidden()
@@ -151,7 +155,7 @@ onUnmounted(() => {
             <v-col v-for="(fotoInfo, key) in FOTOS_OPCIONAIS" :key="key" cols="6">
                 <v-card class="photo-upload-card" elevation="0" :variant="fotos[key] ? 'tonal' : 'tonal'">
                     <div v-if="!fotos[key]" class="upload-area">
-                        <v-btn variant="text" height="100%" width="100%" @click="triggerFileInput(key)"
+                        <v-btn :disabled="isUploading" variant="text" height="100%" width="100%" @click="triggerFileInput(key)"
                             aria-label="Adicionar foto do painel">
                             <div>
                                 <v-icon :icon="fotoInfo.icon" size="48" color="primary" />
@@ -181,10 +185,11 @@ onUnmounted(() => {
             @change="handleFileSelect" />
     </v-form-card>
 
-    <v-image-dialog  v-if="selectedPhotoKey"  :foto="fotos[selectedPhotoKey]" v-model:isModalVisible="isModalVisible" :selectedPhotoKey="selectedPhotoKey"
-        :removePhoto="removePhoto" :titulo="FOTOS_OPCIONAIS[selectedPhotoKey].titulo"  @update:photo="handlePhotoUpdate" />
+    <v-image-dialog v-if="selectedPhotoKey" :foto="fotos[selectedPhotoKey]" v-model:isModalVisible="isModalVisible"
+        :selectedPhotoKey="selectedPhotoKey" :removePhoto="removePhoto"
+        :titulo="FOTOS_OPCIONAIS[selectedPhotoKey].titulo" @update:photo="handlePhotoUpdate" />
 
-    <SuccessDialog :is-modal-visible="isSuccessModalVisible" ></SuccessDialog>
+    <SuccessDialog :is-modal-visible="isSuccessModalVisible"></SuccessDialog>
 </template>
 
 <style scoped>

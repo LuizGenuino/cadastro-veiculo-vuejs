@@ -58,10 +58,10 @@ async function onSubmit() {
         useLoading().hidden()
 
 
-        router.push({ path: `/informacao-veiculo/${token}`, query: { veiculo }});
+        router.push({ path: `/informacao-veiculo/${token}`, query: { veiculo } });
 
     } catch (error) {
-        console.error("Erro ao selecionar a versão:", error); 
+        console.error("Erro ao selecionar a versão:", error);
         toast('Ocorreu um erro. Tente novamente.', 'error');
     } finally {
         isLoading.value = false;
@@ -85,7 +85,7 @@ onMounted(() => {
                         <template #label>
                             <v-card class="rounded-xl w-full min-width"
                                 :variant="veiculoSelecionado?.uid === veiculo.uid ? 'tonal' : 'elevated'"
-                                :color="veiculoSelecionado?.uid === veiculo.uid ? 'primary' : 'blue-grey-lighten-5'"
+                                :color="veiculoSelecionado?.uid === veiculo.uid ? 'primary' : 'bg-component'"
                                 elevation="2">
                                 <v-card-text>
                                     <div class="mb-2 ">
@@ -104,7 +104,7 @@ onMounted(() => {
                                         </p>
                                     </div>
                                     <div class="d-flex justify-center align-center">
-                                        <div class="text-end">
+                                        <div class="text-center">
                                             <p class="font-weight-bold text-primary">{{ veiculo.valor_fipe }}</p>
                                             <p class="text-caption text-medium-emphasis">Valor FIPE</p>
                                         </div>

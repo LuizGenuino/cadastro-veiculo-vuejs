@@ -45,7 +45,7 @@ const formState = reactive<FormStateType>({
     motivoVenda: '',
 
     checklist: PERGUNTAS.reduce((acc, pergunta) => {
-        acc[pergunta.key] = false;
+        acc[pergunta.key] = null;
         return acc;
     }, {} as FormStateType['checklist'])
 });
@@ -62,7 +62,7 @@ const validators = {
 
 
 const areAllQuestionsAnswered = computed(() => {
-    return PERGUNTAS.every(pergunta => formState.checklist[pergunta.key] !== null);
+    return PERGUNTAS.every(pergunta => formState.checklist[pergunta.key] !== undefined);
 });
 
 

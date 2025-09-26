@@ -51,11 +51,13 @@ const uploading = ref<Partial<Record<PhotoKey, boolean>>>({});
 const uploadProgress = ref<Partial<Record<PhotoKey, number>>>({});
 
 
-const isModalVisible = ref(false);
+const isModalVisible = ref<boolean>(false);
 const selectedPhotoKey = ref<PhotoKey | null>(null);
 
 
-const isLoading = ref(false);
+const isLoading = ref<boolean>(false);
+const isUploading = ref<boolean>(false);
+
 
 
 const formVerification = defineModel<boolean>('formVerification', { default: false });
@@ -96,6 +98,7 @@ const handleFileSelect = async (event: Event) => {
 
     uploading.value[key] = true;
     uploadProgress.value[key] = 0;
+    isUploading.value = true
 
     try {
 
@@ -115,9 +118,10 @@ const handleFileSelect = async (event: Event) => {
     } catch (error) {
         console.error("Erro no upload da foto:", error);
         toast('Erro ao adicionar a foto.', 'error');
+        isUploading.value = false
     } finally {
         uploading.value[key] = false;
-
+        isUploading.value = false
         target.value = '';
         target.removeAttribute('data-photo-key');
     }
@@ -179,8 +183,8 @@ onUnmounted(() => {
             <v-col v-for="(fotoInfo, key) in FOTOS_OBRIGATORIAS" :key="key" cols="6">
                 <v-card class="photo-upload-card" elevation="0" :variant="fotos[key] ? 'tonal' : 'tonal'">
                     <div v-if="!fotos[key]" class="upload-area">
-                        <v-btn variant="text" height="100%" width="100%" @click="triggerFileInput(key)"
-                            aria-label="Adicionar foto do painel">
+                        <v-btn :disabled="isUploading" variant="text" height="100%" width="100%"
+                            @click="triggerFileInput(key)" aria-label="Adicionar foto do painel">
                             <div>
                                 <v-icon :icon="fotoInfo.icon" size="48" color="primary" :class="fotoInfo?.class" />
                                 <h4 class="mt-2 mb-1 text-primary">{{ fotoInfo.titulo }}</h4>
