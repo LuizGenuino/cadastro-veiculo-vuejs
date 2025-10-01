@@ -1,58 +1,30 @@
 <script setup lang="ts">
 import { useLoading } from '@/stores/loading';
+import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
 import { toast } from '@/utils/swal/toast';
-import type { CadastroVeiculoType } from '@/utils/types';
-import { ref, computed, onUnmounted, watch, inject } from 'vue'
+import { FOTOS_OBRIGATORIAS, type CadastroVeiculoType, type PhotoData, type requiredPhotosKey } from '@/utils/types';
+import { ref, computed, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
-
-type PhotoKey = keyof typeof FOTOS_OBRIGATORIAS;
-
-interface PhotoData {
-    file: File;
-    url: string;
-}
 
 const router = useRouter();
 const route = useRoute();
 const query = route.query;
 
 
-const FOTOS_OBRIGATORIAS = {
-    painel: { titulo: 'Painel', icon: 'mdi-speedometer', class: "" },
-    lateralEsquerda: { titulo: 'Lateral Esquerda', icon: 'mdi-motorbike', class: "" },
-    lateralDireita: { titulo: 'Lateral Direita', icon: 'mdi-motorbike', class: "mdi-flip-h" },
-    documento: { titulo: 'Documento', icon: 'mdi-file-document', class: "" }
-} as const;
-
-const form = reactive<CadastroVeiculoType>({
-    loja_usuario: '',
-    placa_ou_chassi: '',
-    nome_proprietario: '',
-    telefone_proprietario: '',
-    marca: '',
-    modelo: '',
-    ano: '',
-    valor_fipe: '',
-    placa: '',
-    id_veiculo_fipe: '',
-    valorDesejado: 0,
-    kmRodado: 0,
-    estadoConservacao: "",
-    motivoVenda: "",
-});
+const form = reactive<Partial<CadastroVeiculoType>>({});
 
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
-const fotos = ref<Partial<Record<PhotoKey, PhotoData>>>({});
+const fotos = ref<Partial<Record<requiredPhotosKey, PhotoData>>>({});
 
 
-const uploading = ref<Partial<Record<PhotoKey, boolean>>>({});
-const uploadProgress = ref<Partial<Record<PhotoKey, number>>>({});
+const uploading = ref<Partial<Record<requiredPhotosKey, boolean>>>({});
+const uploadProgress = ref<Partial<Record<requiredPhotosKey, number>>>({});
 
 
 const isModalVisible = ref<boolean>(false);
-const selectedPhotoKey = ref<PhotoKey | null>(null);
+const selectedPhotoKey = ref<requiredPhotosKey | null>(null);
 
 
 const isLoading = ref<boolean>(false);
@@ -77,13 +49,13 @@ watch(todasFotosEnviadas, (newValue) => {
 });
 
 
-const triggerFileInput = (key: PhotoKey) => {
+const triggerFileInput = (key: requiredPhotosKey) => {
 
     fileInputRef.value?.setAttribute('data-photo-key', key);
     fileInputRef.value?.click();
 }
 
-function handlePhotoUpdate(key: PhotoKey, newPhotoData: PhotoData) {
+function handlePhotoUpdate(key: requiredPhotosKey, newPhotoData: PhotoData) {
     if (fotos.value[key]) {
         fotos.value[key] = newPhotoData;
     }
@@ -92,7 +64,7 @@ function handlePhotoUpdate(key: PhotoKey, newPhotoData: PhotoData) {
 const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
-    const key = target.getAttribute('data-photo-key') as PhotoKey | null;
+    const key = target.getAttribute('data-photo-key') as requiredPhotosKey | null;
 
     if (!file || !key) return;
 
@@ -111,8 +83,6 @@ const handleFileSelect = async (event: Event) => {
             file,
             url: URL.createObjectURL(file)
         };
-
-        toast('Foto adicionada com sucesso!', 'success');
         openPhotoModal(key)
 
     } catch (error) {
@@ -127,17 +97,16 @@ const handleFileSelect = async (event: Event) => {
     }
 }
 
-const removePhoto = (key: PhotoKey) => {
+const removePhoto = (key: requiredPhotosKey) => {
     const photo = fotos.value[key];
     if (photo) {
         URL.revokeObjectURL(photo.url);
         delete fotos.value[key];
-        toast('Foto removida.', 'info');
     }
 }
 
 
-const openPhotoModal = (key: PhotoKey) => {
+const openPhotoModal = (key: requiredPhotosKey) => {
     selectedPhotoKey.value = key;
     isModalVisible.value = true;
 }
@@ -152,60 +121,30 @@ const onSubmit = async () => {
     isLoading.value = true;
     console.log('Enviando fotos:', fotos.value);
     await new Promise(resolve => setTimeout(resolve, 1500));
-    toast('Cadastro enviado com sucesso!', 'success');
     const token = '123';
 
     console.log(fotos.value);
+    form.fotos_obrigatorias = { ...fotos.value };
 
+    const queryObj: Record<string, any> = transformDataToQueryParameters(form);
 
     useLoading().hidden()
 
-    await router.push({ query: { ...form, fotos_obrigatorias: JSON.stringify(fotos.value) } });
+    await router.push({ query: queryObj });
 
-    router.push({ path: `/imagens-opcionais/${token}`, query: { ...form, fotos_obrigatorias: JSON.stringify(fotos.value) } });
+    router.push({ path: `/imagens-opcionais/${token}`, query: queryObj });
 
 }
 
 onMounted(() => {
-    if (query.uid) form.uid = String(query.uid);
-    if (query.loja) form.loja_usuario = String(query.loja);
-    if (query.placa_chassi) form.placa_ou_chassi = String(query.placa_chassi);
-    if (query.nome) form.nome_proprietario = String(query.nome);
-    if (query.telefone) form.telefone_proprietario = String(query.telefone);
-    if (query.id_veiculo_fipe) form.id_veiculo_fipe = String(query.id_veiculo_fipe);
-    if (query.valor_fipe) form.valor_fipe = String(query.valor_fipe);
-    if (query.valorDesejado) form.valorDesejado = Number(query.valorDesejado) || 0;
-    if (query.kmRodado) form.kmRodado = Number(query.kmRodado) || 0;
-    if (query.estadoConservacao) form.estadoConservacao = String(query.estadoConservacao);
-    if (query.motivoVenda) form.motivoVenda = String(query.motivoVenda);
-    if (query.fotos_obrigatorias) {
-        try {
-            const fotosObj = JSON.parse(String(query.fotos_obrigatorias));
-            Object.keys(fotosObj).forEach(key => {
-                const k = key as PhotoKey;
-                const fileData = fotosObj[k];
-                console.log(fileData, k);
-                
-                if (fileData && fileData.url) {
-                    fotos.value[k] = {
-                        file: new File([], fileData.file.name || 'photo.jpg'),
-                        url: fileData.url
-                    };
-                }
-            });
-        } catch (error) {
-            console.error("Erro ao parsear fotos obrigatórias:", error);
-        }
+    const data: Partial<CadastroVeiculoType> = parseQueryParametersToData(query);
+    Object.assign(form, data);
+    if (data.fotos_obrigatorias) {
+        fotos.value = { ...data.fotos_obrigatorias };
     }
 });
 
-onUnmounted(() => {
-    Object.values(fotos.value).forEach(photo => {
-        if (photo?.url) {
-            URL.revokeObjectURL(photo.url);
-        }
-    });
-});
+
 </script>
 
 <template>

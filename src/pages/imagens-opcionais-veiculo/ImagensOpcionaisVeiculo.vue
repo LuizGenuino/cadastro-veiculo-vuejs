@@ -4,58 +4,27 @@ import { ref, computed, onUnmounted, watch } from 'vue'
 import SuccessDialog from './components/SuccessDialog.vue';
 import { useLoading } from '@/stores/loading';
 import { toast } from '@/utils/swal/toast';
-import type { CadastroVeiculoType } from '@/utils/types';
+import { FOTOS_OPCIONAIS, type CadastroVeiculoType, type optionalPhotosKey, type PhotoData } from '@/utils/types';
+import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
 
 const router = useRouter();
 const route = useRoute();
 const query = route.query;
 
-type PhotoKey = keyof typeof FOTOS_OPCIONAIS;
 
-interface PhotoData {
-    file: File;
-    url: string;
-}
-
-
-
-const FOTOS_OPCIONAIS = {
-    frente: { titulo: 'Frente', icon: 'mdi-motorbike' },
-    tras: { titulo: 'Tras', icon: 'mdi-card-text' },
-    pneuTraseiro: { titulo: 'Pneu Traseiro', icon: 'mdi-tire' },
-    pneuDianteiro: { titulo: 'Pneu Dianteiro', icon: 'mdi-tire' },
-    motor: { titulo: 'Motor', icon: 'mdi-engine' }
-} as const;
-
-
-const form = reactive<CadastroVeiculoType>({
-    loja_usuario: '',
-    placa_ou_chassi: '',
-    nome_proprietario: '',
-    telefone_proprietario: '',
-    marca: '',
-    modelo: '',
-    ano: '',
-    valor_fipe: '',
-    placa: '',
-    id_veiculo_fipe: '',
-    valorDesejado: 0,
-    kmRodado: 0,
-    estadoConservacao: "",
-    motivoVenda: "",
-});
+const form = reactive<Partial<CadastroVeiculoType>>({});
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
-const fotos = ref<Partial<Record<PhotoKey, PhotoData>>>({});
+const fotos = ref<Partial<Record<optionalPhotosKey, PhotoData>>>({});
 
 
-const uploading = ref<Partial<Record<PhotoKey, boolean>>>({});
-const uploadProgress = ref<Partial<Record<PhotoKey, number>>>({});
+const uploading = ref<Partial<Record<optionalPhotosKey, boolean>>>({});
+const uploadProgress = ref<Partial<Record<optionalPhotosKey, number>>>({});
 
 
 const isModalVisible = ref(false);
 const isSuccessModalVisible = ref(false)
-const selectedPhotoKey = ref<PhotoKey | null>(null);
+const selectedPhotoKey = ref<optionalPhotosKey | null>(null);
 
 const isLoading = ref(false);
 const isUploading = ref<boolean>(false);
@@ -64,13 +33,13 @@ const totalFotosOpcionais = computed(() => Object.keys(FOTOS_OPCIONAIS).length);
 const fotosEnviadasCount = computed(() => Object.keys(fotos.value).length);
 
 
-const triggerFileInput = (key: PhotoKey) => {
+const triggerFileInput = (key: optionalPhotosKey) => {
 
     fileInputRef.value?.setAttribute('data-photo-key', key);
     fileInputRef.value?.click();
 }
 
-function handlePhotoUpdate(key: PhotoKey, newPhotoData: PhotoData) {
+function handlePhotoUpdate(key: optionalPhotosKey, newPhotoData: PhotoData) {
     if (fotos.value[key]) {
         fotos.value[key] = newPhotoData;
     }
@@ -80,7 +49,7 @@ function handlePhotoUpdate(key: PhotoKey, newPhotoData: PhotoData) {
 const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
-    const key = target.getAttribute('data-photo-key') as PhotoKey | null;
+    const key = target.getAttribute('data-photo-key') as optionalPhotosKey | null;
 
     if (!file || !key) return;
 
@@ -99,7 +68,6 @@ const handleFileSelect = async (event: Event) => {
             file,
             url: URL.createObjectURL(file)
         };
-        toast('Foto adicionada com sucesso!', 'success');
         openPhotoModal(key)
 
     } catch (error) {
@@ -114,17 +82,16 @@ const handleFileSelect = async (event: Event) => {
     }
 }
 
-const removePhoto = (key: PhotoKey) => {
+const removePhoto = (key: optionalPhotosKey) => {
     const photo = fotos.value[key];
     if (photo) {
         URL.revokeObjectURL(photo.url);
         delete fotos.value[key];
-        toast('Foto removida.', 'info');
     }
 }
 
 
-const openPhotoModal = (key: PhotoKey) => {
+const openPhotoModal = (key: optionalPhotosKey) => {
     selectedPhotoKey.value = key;
     isModalVisible.value = true;
 }
@@ -136,7 +103,9 @@ const onSubmit = async () => {
 
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    await router.push({ query: { ...form, fotos_opcionais: JSON.stringify(fotos.value) } });
+    const queryObj: Record<string, any> = transformDataToQueryParameters(form);
+
+    await router.push({ query: queryObj });
 
     useLoading().hidden()
     console.log('Enviando fotos:', fotos.value);
@@ -145,36 +114,8 @@ const onSubmit = async () => {
 }
 
 onMounted(() => {
-    if (query.uid) form.uid = String(query.uid);
-    if (query.loja) form.loja_usuario = String(query.loja);
-    if (query.placa_chassi) form.placa_ou_chassi = String(query.placa_chassi);
-    if (query.nome) form.nome_proprietario = String(query.nome);
-    if (query.telefone) form.telefone_proprietario = String(query.telefone);
-    if (query.id_veiculo_fipe) form.id_veiculo_fipe = String(query.id_veiculo_fipe);
-    if (query.valor_fipe) form.valor_fipe = String(query.valor_fipe);
-    if (query.valorDesejado) form.valorDesejado = Number(query.valorDesejado) || 0;
-    if (query.kmRodado) form.kmRodado = Number(query.kmRodado) || 0;
-    if (query.estadoConservacao) form.estadoConservacao = String(query.estadoConservacao);
-    if (query.motivoVenda) form.motivoVenda = String(query.motivoVenda);
-    if (query.fotos_opcionais) {
-        try {
-            const fotosObj = JSON.parse(String(query.fotos_opcionais));
-            Object.keys(fotosObj).forEach(key => {
-                const k = key as PhotoKey;
-                const fileData = fotosObj[k];
-                console.log(fileData, k);
-                
-                if (fileData && fileData.url) {
-                    fotos.value[k] = {
-                        file: new File([], fileData.file.name || 'photo.jpg'),
-                        url: fileData.url
-                    };
-                }
-            });
-        } catch (error) {
-            console.error("Erro ao parsear fotos obrigatórias:", error);
-        }
-    }
+    const data: Partial<CadastroVeiculoType> = parseQueryParametersToData(query);
+    Object.assign(form, data);
 });
 
 onUnmounted(() => {
@@ -195,8 +136,8 @@ onUnmounted(() => {
             <v-col v-for="(fotoInfo, key) in FOTOS_OPCIONAIS" :key="key" cols="6">
                 <v-card class="photo-upload-card" elevation="0" :variant="fotos[key] ? 'tonal' : 'tonal'">
                     <div v-if="!fotos[key]" class="upload-area">
-                        <v-btn :disabled="isUploading" variant="text" height="100%" width="100%" @click="triggerFileInput(key)"
-                            aria-label="Adicionar foto do painel">
+                        <v-btn :disabled="isUploading" variant="text" height="100%" width="100%"
+                            @click="triggerFileInput(key)" aria-label="Adicionar foto do painel">
                             <div>
                                 <v-icon :icon="fotoInfo.icon" size="48" color="primary" />
                                 <h4 class="mt-2 mb-1 text-primary">{{ fotoInfo.titulo }}</h4>

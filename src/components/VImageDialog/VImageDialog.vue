@@ -36,7 +36,11 @@ function updateRotation(rotate: number) {
 
 
 async function applyAndSaveRotation() {
-    if (!props.selectedPhotoKey) return;
+    if (!props.selectedPhotoKey || !props.foto?.file.type) {
+        isModalVisible.value = false;
+
+        return;
+    }
 
     console.log(props.foto?.file.type);
     console.log(props.foto?.file);
@@ -156,17 +160,18 @@ watch(isModalVisible, (newValue) => {
             </v-card-text>
             <v-divider />
 
-            <v-card-actions class="d-flex justify-space-between align-center px-4">
-                <v-btn icon="mdi-delete" color="error"
-                    @click.stop="removePhoto(props.selectedPhotoKey), isModalVisible = false" aria-label="Remover foto"
-                    :disabled="isLoading" />
-                <v-btn-toggle :disabled="isLoading">
-                    <v-btn icon="mdi-rotate-left" @click="updateRotation(-90)" />
-                    <v-btn icon="mdi-rotate-right" @click="updateRotation(90)" />
-                    <v-btn icon="mdi-magnify-minus" @click="updateZoom(-0.2)" :disabled="zoomLevel <= 1" />
-                    <v-btn icon="mdi-magnify-plus" @click="updateZoom(0.2)" :disabled="zoomLevel >= 3" />
+            <v-card-actions class="d-flex flex-column justify-space-between align-center px-4">
+                <v-btn-toggle class="mb-4" :disabled="isLoading">
+                    <v-btn class="mx-2" icon="mdi-rotate-left" @click="updateRotation(-90)" />
+                    <v-btn class="mx-2" icon="mdi-rotate-right" @click="updateRotation(90)" />
+                    <v-btn class="mx-2" icon="mdi-magnify-minus" @click="updateZoom(-0.2)" :disabled="zoomLevel <= 1" />
+                    <v-btn class="mx-2" icon="mdi-magnify-plus" @click="updateZoom(0.2)" :disabled="zoomLevel >= 3" />
                 </v-btn-toggle>
-                <v-btn icon="mdi-content-save" color="success" @click="applyAndSaveRotation" :loading="isLoading" />
+                <div class="w-100 d-flex justify-space-between align-center" >
+                    <v-btn variant="flat" prepend-icon="mdi-delete" color="error" text="Remover"
+                        @click.stop="removePhoto(props.selectedPhotoKey), isModalVisible = false" :disabled="isLoading" />
+                    <v-btn variant="flat" prepend-icon="mdi-content-save" color="success"  text="Salvar" @click="applyAndSaveRotation" :loading="isLoading" />
+                </div>
             </v-card-actions>
         </v-card>
     </v-dialog>

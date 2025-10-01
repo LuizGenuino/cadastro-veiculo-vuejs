@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import type { CadastroVeiculoType } from '../../utils/types'
 import { useLoading } from '@/stores/loading';
 import { toast } from '@/utils/swal/toast';
+import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
 
 const router = useRouter();
 const route = useRoute()
@@ -15,18 +16,7 @@ const LOJAS = [
 ];
 
 
-const form = reactive<CadastroVeiculoType>({
-    loja_usuario: 'PITOM84 MOTOS',
-    placa_ou_chassi: '',
-    nome_proprietario: '',
-    telefone_proprietario: '',
-    marca: '',
-    modelo: '',
-    ano: '',
-    valor_fipe: '',
-    placa: '',
-    id_veiculo_fipe: '',
-});
+const form = reactive<Partial<CadastroVeiculoType>>({});
 
 const isFormValid = ref(false);
 const isLoading = ref(false);
@@ -49,13 +39,13 @@ async function onSubmit() {
         await new Promise(resolve => setTimeout(resolve, 1000));
         const token = '123';
 
-
         useLoading().hidden()
-        toast('Veículo Cadastrado com Sucesso', 'success')
 
-        await router.push({ query: form });
+        const queryObj: Record<string, any> = transformDataToQueryParameters(form);
 
-        await router.push({ path: `/selecionar-veiculo/${token}`, query: form });
+        await router.push({ query: queryObj });
+
+        await router.push({ path: `/selecionar-veiculo/${token}`, query: queryObj });
 
     } catch (error) {
         console.error('Falha ao buscar veículo:', error);
@@ -66,16 +56,9 @@ async function onSubmit() {
 }
 
 onMounted(() => {
-    if (query.uid) {
-        form.uid = String(query.uid);
-        // const token = '123';
-        // router.push({ path: `/selecionar-veiculo/${token}`, query });
-        // return;
-    }
-    if (query.loja_usuario) form.loja_usuario = String(query.loja_usuario);
-    if (query.placa_ou_chassi) form.placa_ou_chassi = String(query.placa_ou_chassi);
-    if (query.nome_proprietario) form.nome_proprietario = String(query.nome_proprietario);
-    if (query.telefone_proprietario) form.telefone_proprietario = String(query.telefone_proprietario);
+    const data: Partial<CadastroVeiculoType> = parseQueryParametersToData(query);
+    Object.assign(form, data);
+    form.loja_usuario = LOJAS[0];
 });
 </script>
 

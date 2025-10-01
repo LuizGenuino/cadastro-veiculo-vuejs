@@ -17,6 +17,14 @@ function cadastrarNovo() {
     router.push({ path: `/${token}` });
 }
 
+function fechar() {
+    const token = '123';
+
+    router.push({ path: `/${token}` });
+}
+
+
+
 </script>
 
 
@@ -33,10 +41,20 @@ function cadastrarNovo() {
             </v-card-text>
             <v-divider />
 
-            <v-card-actions class="justify-space-between pa-4">
-                <v-btn class="rounded-lg text-button" elevation="4" color="info" variant="flat" @click="visualizarVeiculo">Visualizar</v-btn>
-                <v-btn class="rounded-lg text-button" elevation="4" color="warning" variant="flat" @click="cadastrarNovo">Cadastrar
-                    Novo</v-btn>
+            <v-card-actions class="d-flex justify-space-between pa-4">
+                <v-btn class="rounded-lg text-button" elevation="4" color="info" variant="flat"
+                    @click="visualizarVeiculo">
+                    Visualizar
+                </v-btn>
+
+                <v-btn class="rounded-lg text-button" elevation="4" color="warning" variant="flat"
+                    @click="cadastrarNovo">
+                    Cadastrar
+                </v-btn>
+
+                <v-btn class="rounded-lg text-button" elevation="4" color="error" variant="flat" @click="fechar">
+                    Fechar
+                </v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>

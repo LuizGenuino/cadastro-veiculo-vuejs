@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useLoading } from '@/stores/loading';
+import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
 import { toast } from '@/utils/swal/toast';
 import { PERGUNTAS, type CadastroVeiculoType, type FormStateType } from '@/utils/types';
 import { ref, reactive, computed, onMounted } from 'vue'
@@ -21,22 +22,7 @@ const router = useRouter();
 const route = useRoute();
 const query = route.query;
 
-const form = reactive<CadastroVeiculoType>({
-    loja_usuario: '',
-    placa_ou_chassi: '',
-    nome_proprietario: '',
-    telefone_proprietario: '',
-    marca: '',
-    modelo: '',
-    ano: '',
-    valor_fipe: '',
-    placa: '',
-    id_veiculo_fipe: '',
-    valorDesejado: 0,
-    kmRodado: 0,
-    estadoConservacao: "",
-    motivoVenda: "",
-});
+const form = reactive<Partial<CadastroVeiculoType>>({});
 
 
 const formState = reactive<FormStateType>({
@@ -91,21 +77,22 @@ async function onSubmit() {
         form.kmRodado = Number(formState.kmRodado) || 0;
         form.estadoConservacao = formState.estadoConservacao;
         form.motivoVenda = formState.motivoVenda;
+        form.checklist = formState.checklist;
 
         console.log(formState.checklist);
 
 
         await new Promise(resolve => setTimeout(resolve, 1500));
-        toast('Informações salvas com sucesso!', 'success');
-
 
         const token = '123';
 
         useLoading().hidden()
 
-        await router.push({ query: { ...form, checklist: JSON.stringify(formState.checklist) } });
+        const queryObj: Record<string, any> = transformDataToQueryParameters(form);
 
-        router.push({ path: `/imagens-veiculo/${token}`, query: {...form, checklist: JSON.stringify(formState.checklist)} });
+        await router.push({ query: queryObj });
+
+        router.push({ path: `/imagens-veiculo/${token}`, query: queryObj });
 
 
     } catch (error) {
@@ -117,25 +104,13 @@ async function onSubmit() {
 }
 
 onMounted(() => {
-    if (query.uid) form.uid = String(query.uid);
-    if (query.loja) form.loja_usuario = String(query.loja);
-    if (query.placa_chassi) form.placa_ou_chassi = String(query.placa_chassi);
-    if (query.nome) form.nome_proprietario = String(query.nome);
-    if (query.telefone) form.telefone_proprietario = String(query.telefone);
-    if (query.id_veiculo_fipe) form.id_veiculo_fipe = String(query.id_veiculo_fipe);
-    if (query.valor_fipe) form.valor_fipe = String(query.valor_fipe);
-    if (query.valorDesejado) formState.valorDesejado = String(query.valorDesejado);
-    if (query.kmRodado) formState.kmRodado = String(query.kmRodado);
-    if (query.estadoConservacao) formState.estadoConservacao = String(query.estadoConservacao);
-    if (query.motivoVenda) formState.motivoVenda = String(query.motivoVenda);
-    if (query.checklist) {
-        try {
-            const checklist = JSON.parse(String(query.checklist));
-            formState.checklist = { ...formState.checklist, ...checklist };
-        } catch (e) {
-            console.error("Erro ao parsear checklist:", e);
-        }
-    }
+    const data: Partial<CadastroVeiculoType> = parseQueryParametersToData(query);
+    Object.assign(form, data);
+    if (data.valorDesejado) formState.valorDesejado = String(data.valorDesejado);
+    if (data.kmRodado) formState.kmRodado = String(data.kmRodado);
+    if (data.estadoConservacao) formState.estadoConservacao = data.estadoConservacao;
+    if (data.motivoVenda) formState.motivoVenda = data.motivoVenda;
+    if (data.checklist) formState.checklist = { ...data.checklist };
 
 });
 </script>

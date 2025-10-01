@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useLoading } from '@/stores/loading';
+import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
 import { toast } from '@/utils/swal/toast';
 import type { CadastroVeiculoType, VeiculoType } from '@/utils/types';
 import { ref, computed, onMounted, inject } from 'vue'
@@ -14,19 +15,7 @@ const veiculosDisponiveis = ref<VeiculoType[]>([
     { uid: '3', placa: 'ABC-1234', marca: 'Honda', modelo: 'CG 160 TITAN FLEXONE/Ed.Especial 40 Anos', ano: '2018', valor_fipe: 'R$ 13.770,00' }
 ]);
 
-const form = reactive<CadastroVeiculoType>({
-    loja_usuario: '',
-    placa_ou_chassi: '',
-    nome_proprietario: '',
-    telefone_proprietario: '',
-    marca: '',
-    modelo: '',
-    ano: '',
-    valor_fipe: '',
-    placa: '',
-    id_veiculo_fipe: '',
-});
-
+const form = reactive<Partial<CadastroVeiculoType>>({});
 const query = route.query;
 
 
@@ -51,15 +40,15 @@ async function onSubmit() {
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        toast('Versão selecionada com sucesso!', 'success')
-
         const token = '123';
 
         useLoading().hidden()
 
-        await router.push({ query: form });
+        const queryObj: Record<string, any> = transformDataToQueryParameters(form);
 
-        await router.push({ path: `/informacao-veiculo/${token}`, query: form });
+        await router.push({ query: queryObj });
+
+        await router.push({ path: `/informacao-veiculo/${token}`, query: queryObj });
 
     } catch (error) {
         console.error("Erro ao selecionar a versão:", error);
@@ -71,17 +60,17 @@ async function onSubmit() {
 
 
 onMounted(() => {
-    if (query.uid) form.uid = String(query.uid);
-    if (query.loja) form.loja_usuario = String(query.loja);
-    if (query.placa_chassi) form.placa_ou_chassi = String(query.placa_chassi);
-    if (query.nome) form.nome_proprietario = String(query.nome);
-    if (query.telefone) form.telefone_proprietario = String(query.telefone);
-    if (query.id_veiculo_fipe) {
-        form.id_veiculo_fipe = String(query.id_veiculo_fipe);
-        veiculoSelecionado.value = veiculosDisponiveis.value.find(v => v.uid === form.id_veiculo_fipe) || null;
+    const data: Partial<CadastroVeiculoType> = parseQueryParametersToData(query);
+    Object.assign(form, data);
+    if (data.id_veiculo_fipe) {
+        const veiculo = veiculosDisponiveis.value.find(v => v.uid === data.id_veiculo_fipe);
+        if (veiculo) {
+            veiculoSelecionado.value = veiculo;
+        }
     }
-    if (query.valor_fipe) form.valor_fipe = String(query.valor_fipe);
 });
+
+
 </script>
 
 <template>
