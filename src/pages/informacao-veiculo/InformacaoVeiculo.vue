@@ -19,8 +19,9 @@ const MOTIVOS_VENDA = [
 
 const router = useRouter();
 const route = useRoute();
+const query = route.query;
 
-const form = ref<CadastroVeiculoType>({
+const form = reactive<CadastroVeiculoType>({
     loja_usuario: '',
     placa_ou_chassi: '',
     nome_proprietario: '',
@@ -39,8 +40,8 @@ const form = ref<CadastroVeiculoType>({
 
 
 const formState = reactive<FormStateType>({
-    valorDesejado: null,
-    kmRodado: null,
+    valorDesejado: '',
+    kmRodado: '',
     estadoConservacao: '',
     motivoVenda: '',
 
@@ -80,26 +81,32 @@ async function onSubmit() {
     isLoading.value = true;
     try {
         useLoading().show("Salvando Informações Extras...")
-        // Adiciona todos os itens de formState exceto o checklist
-        const { checklist, ...formStateWithoutChecklist } = formState;
-        // Garante que valorDesejado e kmRodado não sejam null
-        const safeFormState = {
-            ...formStateWithoutChecklist,
-            valorDesejado: formState.valorDesejado ?? 0,
-            kmRodado: formState.kmRodado ?? 0,
-        };
-        form.value = { ...form.value, ...safeFormState };
+
+        console.log(formState.valorDesejado);
+        console.log(formState.kmRodado);
+
+
+
+        form.valorDesejado = Number(formState.valorDesejado) || 0;
+        form.kmRodado = Number(formState.kmRodado) || 0;
+        form.estadoConservacao = formState.estadoConservacao;
+        form.motivoVenda = formState.motivoVenda;
+
+        console.log(formState.checklist);
+
+
         await new Promise(resolve => setTimeout(resolve, 1500));
         toast('Informações salvas com sucesso!', 'success');
 
-        const veiculo = JSON.stringify({ ...form.value });
 
         const token = '123';
 
         useLoading().hidden()
 
+        await router.push({ query: { ...form, checklist: JSON.stringify(formState.checklist) } });
 
-        router.push({ path: `/imagens-veiculo/${token}`, query: { veiculo } });
+        router.push({ path: `/imagens-veiculo/${token}`, query: {...form, checklist: JSON.stringify(formState.checklist)} });
+
 
     } catch (error) {
         console.error("Erro ao salvar informações:", error);
@@ -110,7 +117,26 @@ async function onSubmit() {
 }
 
 onMounted(() => {
-    form.value = JSON.parse(route.query.veiculo as string);
+    if (query.uid) form.uid = String(query.uid);
+    if (query.loja) form.loja_usuario = String(query.loja);
+    if (query.placa_chassi) form.placa_ou_chassi = String(query.placa_chassi);
+    if (query.nome) form.nome_proprietario = String(query.nome);
+    if (query.telefone) form.telefone_proprietario = String(query.telefone);
+    if (query.id_veiculo_fipe) form.id_veiculo_fipe = String(query.id_veiculo_fipe);
+    if (query.valor_fipe) form.valor_fipe = String(query.valor_fipe);
+    if (query.valorDesejado) formState.valorDesejado = String(query.valorDesejado);
+    if (query.kmRodado) formState.kmRodado = String(query.kmRodado);
+    if (query.estadoConservacao) formState.estadoConservacao = String(query.estadoConservacao);
+    if (query.motivoVenda) formState.motivoVenda = String(query.motivoVenda);
+    if (query.checklist) {
+        try {
+            const checklist = JSON.parse(String(query.checklist));
+            formState.checklist = { ...formState.checklist, ...checklist };
+        } catch (e) {
+            console.error("Erro ao parsear checklist:", e);
+        }
+    }
+
 });
 </script>
 
@@ -121,12 +147,12 @@ onMounted(() => {
         <v-card-subtitle class="page-subtitle text-center mb-6">passo 2 de 4</v-card-subtitle>
         <v-row>
             <v-col cols="12">
-                <v-currency-field v-model.number="formState.valorDesejado" :readonly="isLoading" label="VALOR DESEJADO*"
+                <v-currency-field v-model:model="formState.valorDesejado" :readonly="isLoading" label="VALOR DESEJADO*"
                     required prefix="R$" currency :hint="`Valor Fipe ${form.valor_fipe}`" />
             </v-col>
 
             <v-col cols="12">
-                <v-currency-field v-model.number="formState.kmRodado" :readonly="isLoading" label="KM RODADO*"
+                <v-currency-field v-model:model="formState.kmRodado" :readonly="isLoading" label="KM RODADO*"
                     suffix="KM" required />
             </v-col>
 

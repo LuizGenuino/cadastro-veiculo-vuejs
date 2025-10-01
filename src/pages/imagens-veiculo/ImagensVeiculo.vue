@@ -13,10 +13,10 @@ interface PhotoData {
     url: string;
 }
 
-
-
 const router = useRouter();
 const route = useRoute();
+const query = route.query;
+
 
 const FOTOS_OBRIGATORIAS = {
     painel: { titulo: 'Painel', icon: 'mdi-speedometer', class: "" },
@@ -25,7 +25,7 @@ const FOTOS_OBRIGATORIAS = {
     documento: { titulo: 'Documento', icon: 'mdi-file-document', class: "" }
 } as const;
 
-const form = ref<CadastroVeiculoType>({
+const form = reactive<CadastroVeiculoType>({
     loja_usuario: '',
     placa_ou_chassi: '',
     nome_proprietario: '',
@@ -154,16 +154,49 @@ const onSubmit = async () => {
     await new Promise(resolve => setTimeout(resolve, 1500));
     toast('Cadastro enviado com sucesso!', 'success');
     const token = '123';
-    const veiculo = JSON.stringify({ ...form.value });
+
+    console.log(fotos.value);
+
+
     useLoading().hidden()
 
+    await router.push({ query: { ...form, fotos_obrigatorias: JSON.stringify(fotos.value) } });
 
-    router.push({ path: `/imagens-opcionais/${token}`, query: { veiculo }, replace: true });
+    router.push({ path: `/imagens-opcionais/${token}`, query: { ...form, fotos_obrigatorias: JSON.stringify(fotos.value) } });
 
 }
 
 onMounted(() => {
-    form.value = JSON.parse(route.query.veiculo as string);
+    if (query.uid) form.uid = String(query.uid);
+    if (query.loja) form.loja_usuario = String(query.loja);
+    if (query.placa_chassi) form.placa_ou_chassi = String(query.placa_chassi);
+    if (query.nome) form.nome_proprietario = String(query.nome);
+    if (query.telefone) form.telefone_proprietario = String(query.telefone);
+    if (query.id_veiculo_fipe) form.id_veiculo_fipe = String(query.id_veiculo_fipe);
+    if (query.valor_fipe) form.valor_fipe = String(query.valor_fipe);
+    if (query.valorDesejado) form.valorDesejado = Number(query.valorDesejado) || 0;
+    if (query.kmRodado) form.kmRodado = Number(query.kmRodado) || 0;
+    if (query.estadoConservacao) form.estadoConservacao = String(query.estadoConservacao);
+    if (query.motivoVenda) form.motivoVenda = String(query.motivoVenda);
+    if (query.fotos_obrigatorias) {
+        try {
+            const fotosObj = JSON.parse(String(query.fotos_obrigatorias));
+            Object.keys(fotosObj).forEach(key => {
+                const k = key as PhotoKey;
+                const fileData = fotosObj[k];
+                console.log(fileData, k);
+                
+                if (fileData && fileData.url) {
+                    fotos.value[k] = {
+                        file: new File([], fileData.file.name || 'photo.jpg'),
+                        url: fileData.url
+                    };
+                }
+            });
+        } catch (error) {
+            console.error("Erro ao parsear fotos obrigatórias:", error);
+        }
+    }
 });
 
 onUnmounted(() => {

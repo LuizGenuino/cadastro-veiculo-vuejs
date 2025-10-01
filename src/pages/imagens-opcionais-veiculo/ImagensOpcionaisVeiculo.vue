@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, onUnmounted, watch, inject } from 'vue'
+import { ref, computed, onUnmounted, watch } from 'vue'
 
 import SuccessDialog from './components/SuccessDialog.vue';
 import { useLoading } from '@/stores/loading';
 import { toast } from '@/utils/swal/toast';
+import type { CadastroVeiculoType } from '@/utils/types';
+
+const router = useRouter();
+const route = useRoute();
+const query = route.query;
 
 type PhotoKey = keyof typeof FOTOS_OPCIONAIS;
 
@@ -22,6 +27,24 @@ const FOTOS_OPCIONAIS = {
     motor: { titulo: 'Motor', icon: 'mdi-engine' }
 } as const;
 
+
+const form = reactive<CadastroVeiculoType>({
+    loja_usuario: '',
+    placa_ou_chassi: '',
+    nome_proprietario: '',
+    telefone_proprietario: '',
+    marca: '',
+    modelo: '',
+    ano: '',
+    valor_fipe: '',
+    placa: '',
+    id_veiculo_fipe: '',
+    valorDesejado: 0,
+    kmRodado: 0,
+    estadoConservacao: "",
+    motivoVenda: "",
+});
+
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const fotos = ref<Partial<Record<PhotoKey, PhotoData>>>({});
 
@@ -34,26 +57,11 @@ const isModalVisible = ref(false);
 const isSuccessModalVisible = ref(false)
 const selectedPhotoKey = ref<PhotoKey | null>(null);
 
-
 const isLoading = ref(false);
 const isUploading = ref<boolean>(false);
 
-
-const formVerification = defineModel<boolean>('formVerification', { default: false });
-
-
-
 const totalFotosOpcionais = computed(() => Object.keys(FOTOS_OPCIONAIS).length);
 const fotosEnviadasCount = computed(() => Object.keys(fotos.value).length);
-
-const todasFotosEnviadas = computed(() => {
-    return fotosEnviadasCount.value === totalFotosOpcionais.value;
-});
-
-
-watch(todasFotosEnviadas, (newValue) => {
-    formVerification.value = newValue;
-});
 
 
 const triggerFileInput = (key: PhotoKey) => {
@@ -122,20 +130,52 @@ const openPhotoModal = (key: PhotoKey) => {
 }
 
 const onSubmit = async () => {
-    if (!todasFotosEnviadas.value) {
-        toast('Por favor, adicione todas as fotos opcionais.', 'warning');
-        return;
-    }
+
     useLoading().show("Enviando Fotos Opcionais...")
     isLoading.value = true;
 
     await new Promise(resolve => setTimeout(resolve, 1500));
+
+    await router.push({ query: { ...form, fotos_opcionais: JSON.stringify(fotos.value) } });
 
     useLoading().hidden()
     console.log('Enviando fotos:', fotos.value);
     toast('Cadastro enviado com sucesso!', 'success');
     isSuccessModalVisible.value = true
 }
+
+onMounted(() => {
+    if (query.uid) form.uid = String(query.uid);
+    if (query.loja) form.loja_usuario = String(query.loja);
+    if (query.placa_chassi) form.placa_ou_chassi = String(query.placa_chassi);
+    if (query.nome) form.nome_proprietario = String(query.nome);
+    if (query.telefone) form.telefone_proprietario = String(query.telefone);
+    if (query.id_veiculo_fipe) form.id_veiculo_fipe = String(query.id_veiculo_fipe);
+    if (query.valor_fipe) form.valor_fipe = String(query.valor_fipe);
+    if (query.valorDesejado) form.valorDesejado = Number(query.valorDesejado) || 0;
+    if (query.kmRodado) form.kmRodado = Number(query.kmRodado) || 0;
+    if (query.estadoConservacao) form.estadoConservacao = String(query.estadoConservacao);
+    if (query.motivoVenda) form.motivoVenda = String(query.motivoVenda);
+    if (query.fotos_opcionais) {
+        try {
+            const fotosObj = JSON.parse(String(query.fotos_opcionais));
+            Object.keys(fotosObj).forEach(key => {
+                const k = key as PhotoKey;
+                const fileData = fotosObj[k];
+                console.log(fileData, k);
+                
+                if (fileData && fileData.url) {
+                    fotos.value[k] = {
+                        file: new File([], fileData.file.name || 'photo.jpg'),
+                        url: fileData.url
+                    };
+                }
+            });
+        } catch (error) {
+            console.error("Erro ao parsear fotos obrigatórias:", error);
+        }
+    }
+});
 
 onUnmounted(() => {
     Object.values(fotos.value).forEach(photo => {
@@ -147,7 +187,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <v-form-card v-model:formVerification="formVerification" :loading="isLoading" card-title="CADASTRO DE VEÍCULO"
+    <v-form-card :loading="isLoading" card-title="CADASTRO DE VEÍCULO"
         card-subtitle="Adicione fotos extras para valorizar seu anúncio" submit-text="Salvar e Finalizar"
         @submit.prevent="onSubmit">
         <v-card-subtitle class="page-subtitle text-center mb-6">passo 4 de 4</v-card-subtitle>

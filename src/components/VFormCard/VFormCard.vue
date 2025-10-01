@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<{
     cardWidth: '95%',
     cardMaxWidth: 460,
 })
-const formVerification = defineModel<boolean>('formVerification')
+const formVerification = defineModel<boolean>('formVerification', { default: true });
 
 const emit = defineEmits<{
     (e: 'onSubmit'): void

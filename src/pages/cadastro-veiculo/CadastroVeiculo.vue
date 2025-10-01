@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref, reactive, inject } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import type { CadastroVeiculoType } from '../../utils/types'
 import { useLoading } from '@/stores/loading';
 import { toast } from '@/utils/swal/toast';
 
 const router = useRouter();
+const route = useRoute()
+
+const query = route.query;
 
 const LOJAS = [
     'PITOM84 MOTOS'
@@ -43,16 +46,16 @@ async function onSubmit() {
     isLoading.value = true;
     try {
         useLoading().show("Cadastrando Veiculo...")
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        const veiculo = JSON.stringify({ ...form });
-
+        await new Promise(resolve => setTimeout(resolve, 1000));
         const token = '123';
 
 
         useLoading().hidden()
         toast('Veículo Cadastrado com Sucesso', 'success')
 
-        router.push({ path: `/selecionar-veiculo/${token}`, query: { veiculo } });
+        await router.push({ query: form });
+
+        await router.push({ path: `/selecionar-veiculo/${token}`, query: form });
 
     } catch (error) {
         console.error('Falha ao buscar veículo:', error);
@@ -61,6 +64,19 @@ async function onSubmit() {
         isLoading.value = false;
     }
 }
+
+onMounted(() => {
+    if (query.uid) {
+        form.uid = String(query.uid);
+        // const token = '123';
+        // router.push({ path: `/selecionar-veiculo/${token}`, query });
+        // return;
+    }
+    if (query.loja_usuario) form.loja_usuario = String(query.loja_usuario);
+    if (query.placa_ou_chassi) form.placa_ou_chassi = String(query.placa_ou_chassi);
+    if (query.nome_proprietario) form.nome_proprietario = String(query.nome_proprietario);
+    if (query.telefone_proprietario) form.telefone_proprietario = String(query.telefone_proprietario);
+});
 </script>
 
 <template>

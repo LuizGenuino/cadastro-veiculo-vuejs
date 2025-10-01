@@ -45,8 +45,8 @@ type PerguntaKey = typeof PERGUNTAS[number]['key'];
 
 
 export interface FormStateType {
-    valorDesejado: number | null;
-    kmRodado: number | null;
+    valorDesejado: string;
+    kmRodado: string ;
     estadoConservacao: string;
     motivoVenda: string;
     checklist: Partial<Record<PerguntaKey, boolean | null>>;

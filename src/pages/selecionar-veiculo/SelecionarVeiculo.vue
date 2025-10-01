@@ -14,7 +14,7 @@ const veiculosDisponiveis = ref<VeiculoType[]>([
     { uid: '3', placa: 'ABC-1234', marca: 'Honda', modelo: 'CG 160 TITAN FLEXONE/Ed.Especial 40 Anos', ano: '2018', valor_fipe: 'R$ 13.770,00' }
 ]);
 
-const form = ref<CadastroVeiculoType>({
+const form = reactive<CadastroVeiculoType>({
     loja_usuario: '',
     placa_ou_chassi: '',
     nome_proprietario: '',
@@ -26,6 +26,8 @@ const form = ref<CadastroVeiculoType>({
     placa: '',
     id_veiculo_fipe: '',
 });
+
+const query = route.query;
 
 
 
@@ -44,9 +46,8 @@ async function onSubmit() {
     isLoading.value = true;
     try {
         useLoading().show("Salvando Escolha....")
-        form.value = { ...form.value, ...veiculoSelecionado.value, id_veiculo_fipe: veiculoSelecionado.value.uid };
-        console.log('Form atualizado:', form.value);
-
+        form.id_veiculo_fipe = veiculoSelecionado.value.uid;
+        form.valor_fipe = veiculoSelecionado.value.valor_fipe;
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -54,11 +55,11 @@ async function onSubmit() {
 
         const token = '123';
 
-        const veiculo = JSON.stringify({ ...form.value });
         useLoading().hidden()
 
+        await router.push({ query: form });
 
-        router.push({ path: `/informacao-veiculo/${token}`, query: { veiculo } });
+        await router.push({ path: `/informacao-veiculo/${token}`, query: form });
 
     } catch (error) {
         console.error("Erro ao selecionar a versão:", error);
@@ -70,7 +71,16 @@ async function onSubmit() {
 
 
 onMounted(() => {
-    form.value = JSON.parse(route.query.veiculo as string);
+    if (query.uid) form.uid = String(query.uid);
+    if (query.loja) form.loja_usuario = String(query.loja);
+    if (query.placa_chassi) form.placa_ou_chassi = String(query.placa_chassi);
+    if (query.nome) form.nome_proprietario = String(query.nome);
+    if (query.telefone) form.telefone_proprietario = String(query.telefone);
+    if (query.id_veiculo_fipe) {
+        form.id_veiculo_fipe = String(query.id_veiculo_fipe);
+        veiculoSelecionado.value = veiculosDisponiveis.value.find(v => v.uid === form.id_veiculo_fipe) || null;
+    }
+    if (query.valor_fipe) form.valor_fipe = String(query.valor_fipe);
 });
 </script>
 
