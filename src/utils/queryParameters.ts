@@ -13,7 +13,6 @@ export function transformDataToQueryParameters(data: Partial<CadastroVeiculoType
             }
         }
     }
-
     return queryParams;
 }
 
@@ -35,5 +34,6 @@ export function parseQueryParametersToData(query: LocationQuery): Partial<Cadast
             }
         }
     }
+
     return data;
 }

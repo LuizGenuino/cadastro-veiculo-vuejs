@@ -46,9 +46,9 @@ async function onSubmit() {
 
         const queryObj: Record<string, any> = transformDataToQueryParameters(form);
 
-        await router.push({ query: queryObj });
+         await router.replace({ query: queryObj });
 
-        await router.push({ path: `/informacao-veiculo/${token}`, query: queryObj });
+        router.push({ path: `/informacao-veiculo/${token}`, query: queryObj });
 
     } catch (error) {
         console.error("Erro ao selecionar a versão:", error);

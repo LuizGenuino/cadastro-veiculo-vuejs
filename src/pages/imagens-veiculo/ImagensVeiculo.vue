@@ -130,7 +130,7 @@ const onSubmit = async () => {
 
     useLoading().hidden()
 
-    await router.push({ query: queryObj });
+     await router.replace({ query: queryObj });
 
     router.push({ path: `/imagens-opcionais/${token}`, query: queryObj });
 

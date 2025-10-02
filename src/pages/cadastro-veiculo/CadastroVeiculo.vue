@@ -5,18 +5,16 @@ import type { CadastroVeiculoType } from '../../utils/types'
 import { useLoading } from '@/stores/loading';
 import { toast } from '@/utils/swal/toast';
 import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
+import { useVeiculo } from '@/stores/veiculo';
 
 const router = useRouter();
-const route = useRoute()
-
-const query = route.query;
 
 const LOJAS = [
     'PITOM84 MOTOS'
 ];
 
 
-const form = reactive<Partial<CadastroVeiculoType>>({});
+const form = ref<Partial<CadastroVeiculoType>>({});
 
 const isFormValid = ref(false);
 const isLoading = ref(false);
@@ -41,11 +39,13 @@ async function onSubmit() {
 
         useLoading().hidden()
 
-        const queryObj: Record<string, any> = transformDataToQueryParameters(form);
+        form.value.etapa_concluida = 'cadastro-veiculo';
 
-        await router.push({ query: queryObj });
+        const queryObj: Record<string, any> = transformDataToQueryParameters(form.value);
 
-        await router.push({ path: `/selecionar-veiculo/${token}`, query: queryObj });
+        await router.replace({ query: queryObj });
+
+        router.push({ path: `/selecionar-veiculo/${token}`, query: queryObj });
 
     } catch (error) {
         console.error('Falha ao buscar veículo:', error);
@@ -56,9 +56,11 @@ async function onSubmit() {
 }
 
 onMounted(() => {
-    const data: Partial<CadastroVeiculoType> = parseQueryParametersToData(query);
-    Object.assign(form, data);
-    form.loja_usuario = LOJAS[0];
+    const data: Partial<CadastroVeiculoType> = useVeiculo().get();
+    form.value = { ...data };
+    if (!form.value.loja_usuario) {
+        form.value.loja_usuario = LOJAS[0];
+    }
 });
 </script>
 

@@ -73,8 +73,8 @@ async function onSubmit() {
 
 
 
-        form.valorDesejado = Number(formState.valorDesejado) || 0;
-        form.kmRodado = Number(formState.kmRodado) || 0;
+        form.valorDesejado = Number(formState.valorDesejado.replace('.', '')) || 0;
+        form.kmRodado = Number(formState.kmRodado.replace('.', '')) || 0;
         form.estadoConservacao = formState.estadoConservacao;
         form.motivoVenda = formState.motivoVenda;
         form.checklist = formState.checklist;
@@ -90,7 +90,7 @@ async function onSubmit() {
 
         const queryObj: Record<string, any> = transformDataToQueryParameters(form);
 
-        await router.push({ query: queryObj });
+        await router.replace({ query: queryObj });
 
         router.push({ path: `/imagens-veiculo/${token}`, query: queryObj });
 

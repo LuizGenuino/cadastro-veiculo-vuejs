@@ -105,7 +105,7 @@ const onSubmit = async () => {
 
     const queryObj: Record<string, any> = transformDataToQueryParameters(form);
 
-    await router.push({ query: queryObj });
+     router.replace({ query: queryObj });
 
     useLoading().hidden()
     console.log('Enviando fotos:', fotos.value);
