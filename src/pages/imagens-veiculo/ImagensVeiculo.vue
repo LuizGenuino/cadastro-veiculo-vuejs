@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import { useLoading } from '@/stores/loading';
-import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
+import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
 import { FOTOS_OBRIGATORIAS, type CadastroVeiculoType, type PhotoData, type requiredPhotosKey } from '@/utils/types';
-import { ref, computed, onUnmounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 
 const router = useRouter();
-const route = useRoute();
-const query = route.query;
 
-
-const form = reactive<Partial<CadastroVeiculoType>>({});
+const form = ref<Partial<CadastroVeiculoType>>({});
 
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
@@ -113,32 +110,36 @@ const openPhotoModal = (key: requiredPhotosKey) => {
 
 
 const onSubmit = async () => {
-    if (!todasFotosEnviadas.value) {
-        toast('Por favor, adicione todas as fotos obrigatórias.', 'warning');
-        return;
+    try {
+        if (!todasFotosEnviadas.value) {
+            toast('Por favor, adicione todas as fotos obrigatórias.', 'warning');
+            return;
+        }
+        useLoading().show("Enviando Fotos Obrigatorias...")
+        isLoading.value = true;
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const token = '123';
+
+        form.value.fotos_obrigatorias = { ...fotos.value };
+        form.value.etapa_atual = 'imagens-opcionais';
+
+        await useVeiculo().set(form.value as CadastroVeiculoType);
+
+        useLoading().hidden()
+
+        router.push({ path: `/imagens-opcionais/${token}` });
+    } catch (error) {
+        console.error('Falha ao buscar veículo:', error);
+        toast('Não foi possível encontrar o veículo. Tente novamente.', 'error');
+    } finally {
+        useLoading().hidden()
+        isLoading.value = false;
     }
-    useLoading().show("Enviando Fotos Obrigatorias...")
-    isLoading.value = true;
-    console.log('Enviando fotos:', fotos.value);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const token = '123';
-
-    console.log(fotos.value);
-    form.fotos_obrigatorias = { ...fotos.value };
-
-    const queryObj: Record<string, any> = transformDataToQueryParameters(form);
-
-    useLoading().hidden()
-
-     await router.replace({ query: queryObj });
-
-    router.push({ path: `/imagens-opcionais/${token}`, query: queryObj });
-
 }
 
 onMounted(() => {
-    const data: Partial<CadastroVeiculoType> = parseQueryParametersToData(query);
-    Object.assign(form, data);
+    const data: Partial<CadastroVeiculoType> = useVeiculo().get();
+    form.value = { ...data };
     if (data.fotos_obrigatorias) {
         fotos.value = { ...data.fotos_obrigatorias };
     }

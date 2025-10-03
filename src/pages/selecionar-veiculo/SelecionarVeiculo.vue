@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { useLoading } from '@/stores/loading';
-import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
+import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
 import type { CadastroVeiculoType, VeiculoType } from '@/utils/types';
-import { ref, computed, onMounted, inject } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter();
-const route = useRoute();
 
 const veiculosDisponiveis = ref<VeiculoType[]>([
     { uid: '1', placa: 'ABC-1234', marca: 'Honda', modelo: 'XRE 300/ 300 ABS/ FLEX', ano: '2019', valor_fipe: 'R$ 22.150,00' },
@@ -15,10 +14,7 @@ const veiculosDisponiveis = ref<VeiculoType[]>([
     { uid: '3', placa: 'ABC-1234', marca: 'Honda', modelo: 'CG 160 TITAN FLEXONE/Ed.Especial 40 Anos', ano: '2018', valor_fipe: 'R$ 13.770,00' }
 ]);
 
-const form = reactive<Partial<CadastroVeiculoType>>({});
-const query = route.query;
-
-
+const form = ref<Partial<CadastroVeiculoType>>({});
 
 const veiculoSelecionado = ref<VeiculoType | null>(null);
 const isLoading = ref(false);
@@ -35,33 +31,34 @@ async function onSubmit() {
     isLoading.value = true;
     try {
         useLoading().show("Salvando Escolha....")
-        form.id_veiculo_fipe = veiculoSelecionado.value.uid;
-        form.valor_fipe = veiculoSelecionado.value.valor_fipe;
+        form.value.id_veiculo_fipe = veiculoSelecionado.value.uid;
+        form.value.valor_fipe = veiculoSelecionado.value.valor_fipe;
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         const token = '123';
 
+        form.value.etapa_atual = 'informacao-veiculo';
+
+        await useVeiculo().set(form.value as CadastroVeiculoType);
+
         useLoading().hidden()
 
-        const queryObj: Record<string, any> = transformDataToQueryParameters(form);
-
-         await router.replace({ query: queryObj });
-
-        router.push({ path: `/informacao-veiculo/${token}`, query: queryObj });
+        router.push({ path: `/informacao-veiculo/${token}` });
 
     } catch (error) {
         console.error("Erro ao selecionar a versão:", error);
         toast('Ocorreu um erro. Tente novamente.', 'error');
     } finally {
+        useLoading().hidden()
         isLoading.value = false;
     }
 }
 
 
 onMounted(() => {
-    const data: Partial<CadastroVeiculoType> = parseQueryParametersToData(query);
-    Object.assign(form, data);
+    const data: Partial<CadastroVeiculoType> = useVeiculo().get();
+    form.value = { ...data };
     if (data.id_veiculo_fipe) {
         const veiculo = veiculosDisponiveis.value.find(v => v.uid === data.id_veiculo_fipe);
         if (veiculo) {

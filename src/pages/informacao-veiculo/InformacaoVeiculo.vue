@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useLoading } from '@/stores/loading';
-import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
+import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
 import { PERGUNTAS, type CadastroVeiculoType, type FormStateType } from '@/utils/types';
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 
 const ESTADOS_CONSERVACAO = [
@@ -16,13 +16,9 @@ const MOTIVOS_VENDA = [
     'Não uso mais', 'Upgrade de modelo', 'Outros'
 ];
 
-
-
 const router = useRouter();
-const route = useRoute();
-const query = route.query;
 
-const form = reactive<Partial<CadastroVeiculoType>>({});
+const form = ref<Partial<CadastroVeiculoType>>({});
 
 
 const formState = reactive<FormStateType>({
@@ -48,13 +44,9 @@ const validators = {
 };
 
 
-const areAllQuestionsAnswered = computed(() => {
-    return PERGUNTAS.every(pergunta => formState.checklist[pergunta.key] !== undefined);
-});
-
 
 const isFormCompletelyValid = computed(() => {
-    return isBasicFormValid.value && areAllQuestionsAnswered.value;
+    return isBasicFormValid.value
 });
 
 
@@ -68,51 +60,40 @@ async function onSubmit() {
     try {
         useLoading().show("Salvando Informações Extras...")
 
-        console.log(formState.valorDesejado);
-        console.log(formState.kmRodado);
-
-
-
-        form.valorDesejado = Number(formState.valorDesejado.replace('.', '')) || 0;
-        form.kmRodado = Number(formState.kmRodado.replace('.', '')) || 0;
-        form.estadoConservacao = formState.estadoConservacao;
-        form.motivoVenda = formState.motivoVenda;
-        form.checklist = formState.checklist;
-
-        console.log(formState.checklist);
-
+        form.value.valorDesejado = Number(formState.valorDesejado.replace('.', '')) || 0;
+        form.value.kmRodado = Number(formState.kmRodado.replace('.', '')) || 0;
+        form.value.estadoConservacao = formState.estadoConservacao;
+        form.value.motivoVenda = formState.motivoVenda;
+        form.value.checklist = formState.checklist;
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         const token = '123';
 
+        form.value.etapa_atual = 'imagens-veiculo';
+
+        await useVeiculo().set(form.value as CadastroVeiculoType);
+
         useLoading().hidden()
 
-        const queryObj: Record<string, any> = transformDataToQueryParameters(form);
-
-        await router.replace({ query: queryObj });
-
-        router.push({ path: `/imagens-veiculo/${token}`, query: queryObj });
-
+        router.push({ path: `/imagens-veiculo/${token}` });
 
     } catch (error) {
         console.error("Erro ao salvar informações:", error);
         toast('Ocorreu um erro ao salvar os dados.', 'error');
     } finally {
+        useLoading().hidden()
         isLoading.value = false;
     }
 }
 
 onMounted(() => {
-    const data: Partial<CadastroVeiculoType> = parseQueryParametersToData(query);
-    Object.assign(form, data);
-    if (data.valorDesejado) formState.valorDesejado = String(data.valorDesejado);
-    if (data.kmRodado) formState.kmRodado = String(data.kmRodado);
-    if (data.estadoConservacao) formState.estadoConservacao = data.estadoConservacao;
-    if (data.motivoVenda) formState.motivoVenda = data.motivoVenda;
-    if (data.checklist) formState.checklist = { ...data.checklist };
+    const data: Partial<CadastroVeiculoType> = useVeiculo().get();
+    form.value = { ...data };
+    Object.assign(formState, data);
 
 });
+
 </script>
 
 <template>

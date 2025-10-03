@@ -28,7 +28,7 @@ const validationRules = computed(() => {
 watch(model, (newValue) => {
     if (!newValue) return
     
-    const digitos = newValue.replace(/\D/g, '');
+    const digitos = typeof newValue === "string" ? newValue.replace(/\D/g, '')  : String(newValue);
     
     let maskedValue = digitos;
     if (digitos.length > 3) {

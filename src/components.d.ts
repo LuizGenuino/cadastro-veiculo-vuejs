@@ -8,18 +8,18 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    copy: typeof import('./components/VInputs/components/VCurrencyField.vue')['default']
+    copy: typeof import('./components/VInputs/VCurrencyField.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    VChassiField: typeof import('./components/VInputs/components/VChassiField.vue')['default']
-    VCurrencyField: typeof import('./components/VInputs/components/VCurrencyField.vue')['default']
-    VFoneField: typeof import('./components/VInputs/components/VPhoneField.vue')['default']
+    VChassiField: typeof import('./components/VInputs/VChassiField.vue')['default']
+    VCurrencyField: typeof import('./components/VInputs/VCurrencyField.vue')['default']
+    VFoneField: typeof import('./components/VInputs/VPhoneField.vue')['default']
     VFormCard: typeof import('./components/VFormCard/VFormCard.vue')['default']
-    VIdVehicleInput: typeof import('./components/VInputs/VIdVehicleInput/VIdVehicleInput.vue')['default']
+    VIdVehicleInput: typeof import('./components/VInputs/VIdVehicleInput.vue')['default']
     VImageDialog: typeof import('./components/VImageDialog/VImageDialog.vue')['default']
     VLoading: typeof import('./components/VLoading/VLoading.vue')['default']
-    VNumberField: typeof import('./components/VInputs/components/VCurrencyField.vue')['default']
-    VPhoneField: typeof import('./components/VInputs/components/VPhoneField.vue')['default']
-    VPlacaField: typeof import('./components/VInputs/components/VPlacaField.vue')['default']
+    VNumberField: typeof import('./components/VInputs/VCurrencyField.vue')['default']
+    VPhoneField: typeof import('./components/VInputs/VPhoneField.vue')['default']
+    VPlacaField: typeof import('./components/VInputs/VPlacaField.vue')['default']
   }
 }

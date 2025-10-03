@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 
 import SuccessDialog from './components/SuccessDialog.vue';
 import { useLoading } from '@/stores/loading';
 import { toast } from '@/utils/swal/toast';
 import { FOTOS_OPCIONAIS, type CadastroVeiculoType, type optionalPhotosKey, type PhotoData } from '@/utils/types';
-import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
-
-const router = useRouter();
-const route = useRoute();
-const query = route.query;
+import { useVeiculo } from '@/stores/veiculo';
 
 
-const form = reactive<Partial<CadastroVeiculoType>>({});
+const form = ref<Partial<CadastroVeiculoType>>({});
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const fotos = ref<Partial<Record<optionalPhotosKey, PhotoData>>>({});
@@ -97,25 +93,35 @@ const openPhotoModal = (key: optionalPhotosKey) => {
 }
 
 const onSubmit = async () => {
+    try {
+        useLoading().show("Enviando Fotos Opcionais...")
+        isLoading.value = true;
 
-    useLoading().show("Enviando Fotos Opcionais...")
-    isLoading.value = true;
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+        form.value.fotos_opcionais = { ...fotos.value };
+        form.value.etapa_atual = null;
 
-    const queryObj: Record<string, any> = transformDataToQueryParameters(form);
+        await useVeiculo().clear();
 
-     router.replace({ query: queryObj });
-
-    useLoading().hidden()
-    console.log('Enviando fotos:', fotos.value);
-    toast('Cadastro enviado com sucesso!', 'success');
-    isSuccessModalVisible.value = true
+        useLoading().hidden()
+         toast('Cadastro enviado com sucesso!', 'success');
+          isSuccessModalVisible.value = true
+    } catch (error) {
+        console.error('Falha ao buscar veículo:', error);
+        toast('Não foi possível encontrar o veículo. Tente novamente.', 'error');
+    } finally {
+        useLoading().hidden()
+        isLoading.value = false;
+    }
 }
 
 onMounted(() => {
-    const data: Partial<CadastroVeiculoType> = parseQueryParametersToData(query);
-    Object.assign(form, data);
+    const data: Partial<CadastroVeiculoType> = useVeiculo().get();
+    form.value = { ...data };
+    if (data.fotos_opcionais) {
+        fotos.value = { ...data.fotos_opcionais };
+    }
 });
 
 onUnmounted(() => {

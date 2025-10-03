@@ -35,8 +35,8 @@ export type optionalPhotosKey = keyof typeof FOTOS_OPCIONAIS;
 type PerguntaKey = typeof PERGUNTAS[number]['key'];
 
 export type CadastroVeiculoType = {
-    etapa_concluida: string | null;
-    uid?: string | null;
+    etapa_atual: string | null;
+    uid?: string;
     loja_usuario: string;
     placa_ou_chassi: string;
     nome_proprietario: string;

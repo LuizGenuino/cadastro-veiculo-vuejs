@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defineModel, watch, computed, defineProps } from 'vue'
 
-const model = defineModel<string>('model')
+const model = defineModel<string | null>('model')
 
 const props = defineProps({
     label: { type: String, default: 'CHASSI' },

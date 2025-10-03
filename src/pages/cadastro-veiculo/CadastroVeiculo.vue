@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import type { CadastroVeiculoType } from '../../utils/types'
 import { useLoading } from '@/stores/loading';
 import { toast } from '@/utils/swal/toast';
-import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters';
 import { useVeiculo } from '@/stores/veiculo';
 
 const router = useRouter();
@@ -36,21 +35,20 @@ async function onSubmit() {
         useLoading().show("Cadastrando Veiculo...")
         await new Promise(resolve => setTimeout(resolve, 1000));
         const token = '123';
-
+        
+        form.value.etapa_atual = 'selecionar-veiculo';
+        
+        await useVeiculo().set(form.value as CadastroVeiculoType);
+        
         useLoading().hidden()
 
-        form.value.etapa_concluida = 'cadastro-veiculo';
-
-        const queryObj: Record<string, any> = transformDataToQueryParameters(form.value);
-
-        await router.replace({ query: queryObj });
-
-        router.push({ path: `/selecionar-veiculo/${token}`, query: queryObj });
+        router.push({ path: `/selecionar-veiculo/${token}` });
 
     } catch (error) {
         console.error('Falha ao buscar veículo:', error);
         toast('Não foi possível encontrar o veículo. Tente novamente.', 'error');
     } finally {
+        useLoading().hidden()
         isLoading.value = false;
     }
 }
