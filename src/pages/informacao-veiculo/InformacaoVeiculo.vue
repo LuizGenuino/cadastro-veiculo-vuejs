@@ -104,7 +104,7 @@ onMounted(() => {
         <v-row>
             <v-col cols="12">
                 <v-currency-field v-model:model="formState.valorDesejado" :readonly="isLoading" label="VALOR DESEJADO*"
-                    required prefix="R$" currency :hint="`Valor Fipe ${form.valor_fipe}`" />
+                    required prefix="R$" currency :hint="`Valor Fipe ${form.valor_fipe || 'Não Informado'}`" />
             </v-col>
 
             <v-col cols="12">

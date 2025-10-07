@@ -57,6 +57,12 @@ async function onSubmit() {
 
 
 onMounted(() => {
+    if (veiculosDisponiveis.value.length === 0) {
+        const token = '123';
+        form.value.etapa_atual = 'informacao-veiculo';
+        router.replace({ path: `/informacao-veiculo/${token}` });
+        return;
+    }
     const data: Partial<CadastroVeiculoType> = useVeiculo().get();
     form.value = { ...data };
     if (data.id_veiculo_fipe) {
