@@ -37,7 +37,7 @@ type PerguntaKey = typeof PERGUNTAS[number]['key'];
 export type CadastroVeiculoType = {
     etapa_atual: string | null;
     uid?: string;
-    loja_usuario: string;
+    id_loja_usuario: number;
     placa_ou_chassi: string;
     nome_proprietario: string;
     telefone_proprietario: string;

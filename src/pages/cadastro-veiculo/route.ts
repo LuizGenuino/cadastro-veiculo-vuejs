@@ -1,7 +1,7 @@
 import type { RouteRecordRaw } from "vue-router";
 
 export const CadastroVeiculoRoute: RouteRecordRaw = {
-    path: '/:token([0-9a-fA-F-]{3})',
+    path: '/:token([A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+)',
     name: 'CadastroVeiculo',
     component: () => import('@/layouts/MainLayout.vue'),
     children: [

@@ -1,10 +1,15 @@
-import axios from "axios";
-import { useRoute } from "vue-router"
+import router from "@/router";
+import axios, { AxiosError } from "axios";
+import { handlerErrorRequest } from "../middlewares/errorHandler";
 
 class AxiosInstance {
     public initialize(url: string) {
         const axiosInstance = axios.create({
-            baseURL: url
+            baseURL: url,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            timeout: 15000, //
         })
 
         axiosInstance.interceptors.request.use(async (config) => {
@@ -20,11 +25,9 @@ class AxiosInstance {
             async (response) => {
                 return Promise.resolve(response)
             },
-            async (error) => {
+            async (error: AxiosError) => {
 
-                //  const message = error.response?.data?.message || 'Ocorreu um erro inesperado'
-                //  toast(message, 'error')
-
+                handlerErrorRequest(error)
                 return Promise.reject(error)
             }
         )
@@ -33,8 +36,7 @@ class AxiosInstance {
     }
 
     private getToken(): string | null {
-        const route = useRoute()
-        const params: any = route.params
+        const params = router.currentRoute.value.params as { token?: string }
         if (params && params?.token) {
             return params?.token
         }

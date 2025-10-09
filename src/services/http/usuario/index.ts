@@ -1,0 +1,22 @@
+import { Right } from "@/utils/either/right";
+import { HttpBase } from "../http.base";
+import { Left } from "@/utils/either/left";
+import type { Either } from "@/utils/either";
+import type { UsuarioResponseType } from "./types";
+
+export class HttpUsuario extends HttpBase {
+    constructor(url: string) {
+        super(url)
+    }
+
+    protected resource = '/p84/user'
+
+    async currentUser(): Promise<Either<null, UsuarioResponseType>> {
+        try {
+            const response = await this.http.get(`${this.resource}`)
+            return Right.create(response.data)
+        } catch {
+            return Left.create(null)
+        }
+    }
+}
