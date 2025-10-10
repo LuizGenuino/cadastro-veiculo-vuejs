@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { httpService } from '@/services/http';
+import type { CamposExtrasType, MetadataType } from '@/services/http/campos-extras/types';
 import { useLoading } from '@/stores/loading';
 import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
-import { PERGUNTAS, type CadastroVeiculoType, type FormStateType } from '@/utils/types';
+import { type CadastroVeiculoType, type FormStateType } from '@/utils/types';
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -16,21 +18,24 @@ const MOTIVOS_VENDA = [
     'Não uso mais', 'Upgrade de modelo', 'Outros'
 ];
 
-const router = useRouter();
+const router = useRouter()
+const loadingStore = useLoading()
+const veiculoStore = useVeiculo()
 
 const form = ref<Partial<CadastroVeiculoType>>({});
 
+const controleDadosExtras = ref<MetadataType>({
+    total: 0,
+    groups: []
+})
+
+const camposDadosExtras = ref<CamposExtrasType[]>()
 
 const formState = reactive<FormStateType>({
     valorDesejado: '',
     kmRodado: '',
     estadoConservacao: '',
     motivoVenda: '',
-
-    checklist: PERGUNTAS.reduce((acc, pergunta) => {
-        acc[pergunta.key] = null;
-        return acc;
-    }, {} as FormStateType['checklist'])
 });
 
 const isLoading = ref(false);
@@ -58,13 +63,13 @@ async function onSubmit() {
 
     isLoading.value = true;
     try {
-        useLoading().show("Salvando Informações Extras...")
+        isLoading.value = true
+        loadingStore.show("Salvando Informações Extras...")
 
         form.value.valorDesejado = Number(formState.valorDesejado.replace('.', '')) || 0;
         form.value.kmRodado = Number(formState.kmRodado.replace('.', '')) || 0;
         form.value.estadoConservacao = formState.estadoConservacao;
         form.value.motivoVenda = formState.motivoVenda;
-        form.value.checklist = formState.checklist;
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -72,9 +77,9 @@ async function onSubmit() {
 
         form.value.etapa_atual = 'imagens-veiculo';
 
-        await useVeiculo().set(form.value as CadastroVeiculoType);
+        await veiculoStore.set(form.value as CadastroVeiculoType);
 
-        useLoading().hidden()
+        loadingStore.hidden()
 
         router.push({ path: `/imagens-veiculo/${token}` });
 
@@ -82,13 +87,32 @@ async function onSubmit() {
         console.error("Erro ao salvar informações:", error);
         toast('Ocorreu um erro ao salvar os dados.', 'error');
     } finally {
-        useLoading().hidden()
+        loadingStore.hidden()
         isLoading.value = false;
     }
 }
 
+async function fetchVehicleExtraFields() {
+    isLoading.value = true;
+    loadingStore.show('Carregando campos extras...')
+    try {
+        const response = await httpService.camposExtras.list()
+        if (response.isRight()) {
+            controleDadosExtras.value = response.value?.control.metadata as MetadataType
+            camposDadosExtras.value = response.value?.data
+        }
+    } catch (error) {
+        console.error("Erro ao buscar dados do veículo:", error);
+        toast('Ocorreu um erro ao carregar os dados do veículo.', 'error');
+    } finally {
+        loadingStore.hidden()
+        isLoading.value = false
+    }
+}
+
 onMounted(() => {
-    const data: Partial<CadastroVeiculoType> = useVeiculo().get();
+    fetchVehicleExtraFields();
+    const data: Partial<CadastroVeiculoType> = veiculoStore.get();
     form.value = { ...data };
     Object.assign(formState, data);
 
@@ -128,49 +152,10 @@ onMounted(() => {
 
         <h3 class="text-h6 font-weight-bold mb-4 d-flex align-center">
             <v-icon color="primary" class="me-2">mdi-clipboard-check-outline</v-icon>
-            Checklist do Veículo
+            Dados Extras
         </h3>
-        <div class="extra-info-grid">
-            <div v-for="pergunta in PERGUNTAS" :key="pergunta.key">
-                <v-card class="question-card" variant="outlined" border="opacity-50 sm">
-                    <p class="question-text mb-3">{{ pergunta.texto }}</p>
-                    <v-btn-toggle v-model="formState.checklist[pergunta.key]" variant="outlined" divided mandatory
-                        class="w-100">
-                        <v-btn color="primary" :value="true" class="flex-grow-1">
-                            <v-icon start>mdi-check</v-icon>
-                            Sim
-                        </v-btn>
-                        <v-btn color="error" :value="false" class="flex-grow-1">
-                            <v-icon start>mdi-close</v-icon>
-                            Não
-                        </v-btn>
-                    </v-btn-toggle>
-                </v-card>
-            </div>
-        </div>
+
     </v-form-card>
 </template>
 
-<style scoped>
-.question-card {
-    border-radius: 12px;
-    padding: 16px;
-    background-color: rgba(var(--v-theme-on-surface), 0.04);
-}
-
-.question-text {
-    font-weight: 500;
-    font-size: 0.9rem;
-}
-
-.extra-info-grid {
-    display: grid;
-    gap: 16px;
-}
-
-@media (min-width: 768px) {
-    .extra-info-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-</style>
+<style scoped></style>

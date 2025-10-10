@@ -1,17 +1,4 @@
-export const PERGUNTAS = [
-    { key: 'ipva', texto: 'IPVA está em dia?' },
-    { key: 'chaveReserva', texto: 'Possui chave reserva?' },
-    { key: 'pneusOriginais', texto: 'Pneus são originais?' },
-    { key: 'manual', texto: 'Possui manual do proprietário?' },
-    { key: 'revisoes', texto: 'Revisões em dia?' },
-    { key: 'seguro', texto: 'Possui seguro?' },
-    { key: 'multas', texto: 'Possui multas pendentes?' },
-    { key: 'financiamento', texto: 'Possui financiamento?' },
-    { key: 'sinistro', texto: 'Já teve sinistro?' },
-    { key: 'modificacoes', texto: 'Possui modificações?' },
-    { key: 'garantia', texto: 'Ainda está na garantia?' },
-    { key: 'unicoDono', texto: 'Você é o único dono?' }
-] as const;
+
 
 export const FOTOS_OBRIGATORIAS = {
     painel: { titulo: 'Painel', icon: 'mdi-speedometer', class: "" },
@@ -32,7 +19,6 @@ export type requiredPhotosKey = keyof typeof FOTOS_OBRIGATORIAS;
 
 export type optionalPhotosKey = keyof typeof FOTOS_OPCIONAIS;
 
-type PerguntaKey = typeof PERGUNTAS[number]['key'];
 
 export type CadastroVeiculoType = {
     etapa_atual: string | null;
@@ -52,7 +38,6 @@ export type CadastroVeiculoType = {
     kmRodado: number;
     estadoConservacao: string;
     motivoVenda: string;
-    checklist: Partial<Record<PerguntaKey, boolean | null>>;
     fotos_obrigatorias: Partial<Record<requiredPhotosKey, PhotoData>>;
     fotos_opcionais: Partial<Record<optionalPhotosKey, PhotoData>>;
 
@@ -72,7 +57,6 @@ export interface FormStateType {
     kmRodado: string;
     estadoConservacao: string;
     motivoVenda: string;
-    checklist: Partial<Record<PerguntaKey, boolean | null>>;
 }
 
 export interface PhotoData {
