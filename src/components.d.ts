@@ -9,10 +9,13 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     copy: typeof import('./components/VInputs/VCurrencyField.vue')['default']
+    DynamicField: typeof import('./components/VDynamicForms/DynamicField.vue')['default']
+    FieldGroup: typeof import('./components/VDynamicForms/FieldGroup.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     VChassiField: typeof import('./components/VInputs/VChassiField.vue')['default']
     VCurrencyField: typeof import('./components/VInputs/VCurrencyField.vue')['default']
+    VehicleExtraFieldsForm: typeof import('./components/VDynamicForms/VehicleExtraFieldsForm.vue')['default']
     VFoneField: typeof import('./components/VInputs/VPhoneField.vue')['default']
     VFormCard: typeof import('./components/VFormCard/VFormCard.vue')['default']
     VIdVehicleInput: typeof import('./components/VInputs/VIdVehicleInput.vue')['default']

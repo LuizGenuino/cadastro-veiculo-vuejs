@@ -27,7 +27,7 @@ export type CamposExtrasType = {
     is_required: boolean,
     select_options: string[] | null,
     display: DisplayType,
-    validation: any,
+    validation: ValidationType,
 }
 
 export type DisplayType = {

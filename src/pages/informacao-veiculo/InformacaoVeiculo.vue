@@ -99,7 +99,7 @@ async function fetchVehicleExtraFields() {
         const response = await httpService.camposExtras.list()
         if (response.isRight()) {
             controleDadosExtras.value = response.value?.control.metadata as MetadataType
-            camposDadosExtras.value = response.value?.data
+            camposDadosExtras.value = response.value?.data as CamposExtrasType[]
         }
     } catch (error) {
         console.error("Erro ao buscar dados do veículo:", error);
@@ -154,7 +154,9 @@ onMounted(() => {
             <v-icon color="primary" class="me-2">mdi-clipboard-check-outline</v-icon>
             Dados Extras
         </h3>
-
+         <vehicle-extra-fields-form
+                v-if="controleDadosExtras && controleDadosExtras.total > 0 && camposDadosExtras && camposDadosExtras.length > 0"
+                :controle-dados-extras="controleDadosExtras" :campos-dados-extras="camposDadosExtras" />
     </v-form-card>
 </template>
 
