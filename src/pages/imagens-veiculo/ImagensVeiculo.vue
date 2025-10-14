@@ -120,7 +120,7 @@ const onSubmit = async () => {
         await new Promise(resolve => setTimeout(resolve, 1500));
         const token = '123';
 
-        form.value.fotos_obrigatorias = { ...fotos.value };
+        // form.value.fotos_obrigatorias = { ...fotos.value };
         form.value.etapa_atual = 'imagens-opcionais';
 
         await useVeiculo().set(form.value as CadastroVeiculoType);
@@ -140,9 +140,17 @@ const onSubmit = async () => {
 onMounted(() => {
     const data: Partial<CadastroVeiculoType> = useVeiculo().get();
     form.value = { ...data };
-    if (data.fotos_obrigatorias) {
-        fotos.value = { ...data.fotos_obrigatorias };
-    }
+    // if (data.fotos_obrigatorias) {
+    //     fotos.value = { ...data.fotos_obrigatorias };
+    // }
+});
+
+onUnmounted(() => {
+    Object.values(fotos.value).forEach(photo => {
+        if (photo?.url) {
+            URL.revokeObjectURL(photo.url);
+        }
+    });
 });
 
 

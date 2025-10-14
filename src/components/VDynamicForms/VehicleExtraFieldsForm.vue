@@ -1,70 +1,58 @@
 <script setup lang="ts">
+import { computed, defineModel, defineProps, watchEffect } from 'vue';
 import type { CamposExtrasType, MetadataType } from '@/services/http/campos-extras/types';
 import type { CadastroVeiculoType } from '@/utils/types';
-import { defineProps, onMounted, ref, defineModel } from 'vue';
 
-const extraFieldsModel = defineModel<Partial<CadastroVeiculoType>>('extraFieldsModel')
+const model = defineModel<Partial<CadastroVeiculoType>>('extraFieldsModel', { required: true });
 
 const props = defineProps<{
     controleDadosExtras: MetadataType,
     camposDadosExtras: CamposExtrasType[],
+}>();
 
-}>()
+const groupedFields = computed(() => {
+    const groups = props.controleDadosExtras?.groups;
+    const fields = props.camposDadosExtras;
 
-const dynamicForm = ref<Record<string, any>>()
-
-const groupedFields = ref<{ title: string, fields: CamposExtrasType[] }[]>()
-
-function organizeFieldsByGroups() {
-    if (props.controleDadosExtras && props.controleDadosExtras.groups.length > 0 && props.camposDadosExtras && props.camposDadosExtras.length > 0) {
-        const groups = props.controleDadosExtras.groups;
-        const fields = props.camposDadosExtras;
-        let organized: { title: string, fields: CamposExtrasType[] }[] = [];
-
-        groups.forEach(group => {
-            const groupFields = fields.filter(field => field.display.group === group);
-            organized.push({ title: group, fields: groupFields.sort((a, b) => a.display.order - b.display.order) });
-        });
-
-        console.log(organized);
-
-        groupedFields.value = organized;
-    }
-}
-
-function createDynamicForm() {
-    let formObj: Record<string, any> = {};
-
-    if (
-        props.camposDadosExtras &&
-        props.camposDadosExtras.length > 0 &&
-        extraFieldsModel.value?.campos_extras !== undefined &&
-        Object.keys(extraFieldsModel.value?.campos_extras || {}).length > 0
-    ) {
-        props.camposDadosExtras.forEach(field => {
-            formObj[field.field_key] = (extraFieldsModel.value?.campos_extras?.[field.field_key]) ?? undefined;
-        });
+    if (!groups?.length || !fields?.length) {
+        return [];
     }
 
-    dynamicForm.value = formObj;
-    if (extraFieldsModel.value) {
-        extraFieldsModel.value.campos_extras = dynamicForm.value;
-    }
-}
+    return groups.map(groupTitle => {
+        const groupFields = fields
+            .filter(field => field.display.group === groupTitle)
+            .sort((a, b) => a.display.order - b.display.order);
 
-onMounted(() => {
-    organizeFieldsByGroups();
-    createDynamicForm()
-})
+        return { title: groupTitle, fields: groupFields };
+    });
+});
+
+
+watchEffect(() => {
+    if (!model.value || !props.camposDadosExtras?.length) {
+        return;
+    }
+
+    if (!model.value.campos_extras) {
+        model.value.campos_extras = {};
+    }
+
+    const currentExtras = model.value.campos_extras;
+
+    props.camposDadosExtras.forEach(field => {
+        if (!(field.field_key in currentExtras)) {
+            currentExtras[field.field_key] = undefined;
+        }
+    });
+});
 
 </script>
 
 <template>
-    <div v-if="groupedFields && groupedFields.length > 0">
-        <div v-for="(group, index) in groupedFields" :key="index" class="mb-4">
+    <div v-if="groupedFields.length > 0">
+        <div v-for="group in groupedFields" :key="group.title" class="mb-4">
             <v-col cols="12">
-                <field-group v-if="group.fields.length > 0" :group="group"
-                    v-model:extra-fields-model="extraFieldsModel" />
+                <field-group v-if="group.fields.length > 0" :group="group" v-model:extra-fields-model="model" />
             </v-col>
         </div>
     </div>

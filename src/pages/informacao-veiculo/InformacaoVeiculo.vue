@@ -81,7 +81,6 @@ async function onSubmit() {
 
         loadingStore.hidden()
 
-        console.log(form.value);
         router.push({ path: `/imagens-veiculo/${token.token}` });
 
     } catch (error) {

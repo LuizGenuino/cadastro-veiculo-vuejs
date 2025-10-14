@@ -1,122 +1,103 @@
 <script setup lang="ts">
-import type { CamposExtrasType, } from '@/services/http/campos-extras/types';
-import { defineProps, onMounted, computed } from 'vue';
+import { computed, defineProps, defineModel } from 'vue';
+import type { CamposExtrasType } from '@/services/http/campos-extras/types';
+import { VTextField, VSelect, VNumberInput } from 'vuetify/components';
 
-const model = defineModel<any>('model')
+
+const model = defineModel<unknown>('model');
 
 const props = defineProps<{
     field: CamposExtrasType
-}>()
+}>();
 
-//EXEMPLO DE REGEX VALIDO '^[A-Z]{3}-[0-9A-Z]{4}'
-
+const patternRegex = computed(() => {
+    const pattern = props.field.validation.pattern;
+    return pattern ? new RegExp(pattern) : null;
+});
 
 const validators = {
-    required: (v: any) => props.field.is_required ? !!v || 'Campo obrigatório' : true,
-    pattern: (value: string) => {
-        const regex = props.field.validation.pattern ? new RegExp(props.field.validation.pattern) : null
-
-        if (!regex) return true
-        return !value || regex.test(value) || 'Formato do campo inválido.'
-    },
-    minLength: (v: string) => {
-        if (props.field.validation.min_length) {
-            return v.length >= props.field.validation.min_length || `Mínimo de ${props.field.validation.min_length} caracteres.`
-        }
-        return true
-    },
-    maxLength: (v: string) => {
-        if (props.field.validation.max_length) {
-            return v.length >= props.field.validation.max_length || `Mínimo de ${props.field.validation.max_length} caracteres.`
-        }
-        return true
-    },
-    minValue: (v: number) => {
-        if (props.field.validation.min_value !== undefined && props.field.validation.min_value !== null) {
-            return v >= props.field.validation.min_value || `Valor mínimo de ${props.field.validation.min_value}.`
-        }
-        return true
-    },
-    maxValue: (v: number) => {
-        if (props.field.validation.max_value !== undefined && props.field.validation.max_value !== null) {
-            return v <= props.field.validation.max_value || `Valor máximo de ${props.field.validation.max_value}.`
-        }
-        return true
-    },
+    required: (v: any) => !props.field.is_required || !!v || 'Campo obrigatório',
+    pattern: (v: string) => !patternRegex.value || !v || patternRegex.value.test(v) || 'Formato do campo inválido.',
+    minLength: (v: string) => (props.field.validation.min_length ?? 0) <= (v?.length ?? 0) || `Mínimo de ${props.field.validation.min_length} caracteres.`,
+    maxLength: (v: string) => (props.field.validation.max_length === null) || (v?.length ?? 0) <= props.field.validation.max_length || `Máximo de ${props.field.validation.max_length} caracteres.`,
+    minValue: (v: number) => (props.field.validation.min_value == null) || v >= props.field.validation.min_value || `Valor mínimo de ${props.field.validation.min_value}.`,
+    maxValue: (v: number) => (props.field.validation.max_value == null) || v <= props.field.validation.max_value || `Valor máximo de ${props.field.validation.max_value}.`,
 };
 
 const validationRules = computed(() => {
-    const activeRules = []
-    if (props.field.is_required) {
-        activeRules.push(validators.required)
-    }
-    if (props.field.validation.pattern) {
-        activeRules.push(validators.pattern)
-    }
-    if (props.field.validation.min_length) {
-        activeRules.push(validators.minLength)
-    }
-    if (props.field.validation.max_length) {
-        activeRules.push(validators.maxLength)
-    }
-    if (props.field.validation.min_value) {
-        activeRules.push(validators.minValue)
-    }
-    if (props.field.validation.max_value) {
-        activeRules.push(validators.maxValue)
-    }
-    return activeRules
-})
+    const rulesMap = {
+        is_required: validators.required,
+        'validation.pattern': validators.pattern,
+        'validation.min_length': validators.minLength,
+        'validation.max_length': validators.maxLength,
+        'validation.min_value': validators.minValue,
+        'validation.max_value': validators.maxValue,
+    };
+
+    // Filtra e mapeia apenas as regras que se aplicam ao campo atual.
+    return Object.entries(rulesMap)
+        .filter(([key]) => {
+            // Acessa propriedades aninhadas como 'validation.pattern'
+            const keys = key.split('.');
+            let value = props.field as any;
+            for (const k of keys) {
+                if (value === undefined || value === null) return false;
+                value = value[k];
+            }
+            // A regra se aplica se o valor for verdadeiro (is_required) ou existir.
+            return !!value;
+        })
+        .map(([, ruleFn]) => ruleFn);
+});
 
 
+const componentMap: Record<string, any> = {
+    TEXT: VTextField,
+    NUMERIC: VNumberInput,
+    DATE: VTextField,
+    TIME: VTextField,
+    SELECT: VSelect,
+    MULTISELECT: VSelect,
+};
 
-onMounted(() => {
+const commonProps = computed(() => ({
+    label: props.field.field_label,
+    hint: props.field.field_description,
+    persistentHint: true,
+    variant: 'outlined',
+    rules: validationRules.value,
+}));
 
-})
+const specificProps = computed(() => {
+    const type = props.field.data_type;
+    switch (type) {
+        case 'DATE': return { type: 'date' };
+        case 'TIME': return { type: 'time' };
+        case 'NUMERIC': return { controlVariant: 'hidden' };
+        case 'SELECT': return { items: props.field.select_options || [], clearable: true };
+        case 'MULTISELECT': return { items: props.field.select_options || [], clearable: true, multiple: true, chips: true };
+        default: return {};
+    }
+});
+
+const fieldComponent = computed(() => componentMap[props.field.data_type]);
 
 </script>
 
 <template>
-    <v-text-field v-model:model-value="model" v-if="props.field.data_type === 'TEXT'" :rules="[...validationRules]"
-        :label="props.field.field_label" :hint="props.field.field_description" persistent-hint variant="outlined"
-        :minlength="props.field.validation.min_length || undefined"
-        :maxlength="props.field.validation.max_length || undefined" />
-
-    <v-number-input v-model:model-value="model" v-if="props.field.data_type === 'NUMERIC'" :rules="[...validationRules]"
-        control-variant="hidden" :label="props.field.field_label" :hint="props.field.field_description" persistent-hint
-        variant="outlined" :min="props.field.validation.min_value || undefined"
-        :max="props.field.validation.max_value || undefined" />
-
-    <v-card v-if="props.field.data_type === 'BOOLEAN'" :rules="[...validationRules]" variant="text">
+    <v-card v-if="props.field.data_type === 'BOOLEAN'" variant="text">
         <p class="question-text mb-3">{{ props.field.field_label }}</p>
-        <v-btn-toggle v-model:model-value="model" variant="outlined" divided mandatory class="w-100"
-            :hint="props.field.field_description" persistent-hint>
+        <v-btn-toggle v-model="model" variant="outlined" divided mandatory class="w-100">
             <v-btn color="primary" :value="true" class="flex-grow-1">
-                <v-icon start>mdi-check</v-icon>
-                Sim
+                <v-icon start>mdi-check</v-icon> Sim
             </v-btn>
             <v-btn color="error" :value="false" class="flex-grow-1">
-                <v-icon start>mdi-close</v-icon>
-                Não
+                <v-icon start>mdi-close</v-icon> Não
             </v-btn>
         </v-btn-toggle>
-        <span class="text-caption font-weight-medium dark:text-white">{{ props.field.field_description }}</span>
+        <span class="text-caption font-weight-medium mt-2 d-block text-span">{{ props.field.field_description }}</span>
     </v-card>
 
-    <v-text-field v-model:model-value="model" v-if="props.field.data_type === 'DATE'" :rules="[...validationRules]"
-        type="date" :label="props.field.field_label" :hint="props.field.field_description" persistent-hint
-        variant="outlined" />
-
-    <v-text-field v-model:model-value="model" v-if="props.field.data_type === 'TIME'" :rules="[...validationRules]"
-        type="time" :label="props.field.field_label" :hint="props.field.field_description" persistent-hint
-        variant="outlined" />
-
-    <v-select v-model:model-value="model" v-if="props.field.data_type === 'SELECT'" :rules="[...validationRules]"
-        clearable :label="props.field.field_label" :hint="props.field.field_description" persistent-hint
-        variant="outlined" :items="props.field.select_options || []" />
-
-    <v-select v-model:model-value="model" v-if="props.field.data_type === 'MULTISELECT'" :rules="[...validationRules]"
-        multiple clearable chips :label="props.field.field_label" :hint="props.field.field_description" persistent-hint
-        variant="outlined" :items="props.field.select_options || []" />
-
+    <component v-else-if="fieldComponent" :is="fieldComponent" v-model="model"
+        v-bind="{ ...commonProps, ...specificProps }" />
 </template>

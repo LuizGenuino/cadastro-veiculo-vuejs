@@ -22,6 +22,7 @@ export default createVuetify({
                     secondary: '#384967',
                     background: '#ffffffff',
                     "bg-component": '#ECEFF1',
+                    span: '#828282'
                 },
             },
             dark: {
@@ -30,6 +31,7 @@ export default createVuetify({
                     secondary: '#384967',
                     background: '#29364d',
                     "bg-component": '#1e2738ff',
+                    span: '#b6bac2'
                 },
             },
         },
