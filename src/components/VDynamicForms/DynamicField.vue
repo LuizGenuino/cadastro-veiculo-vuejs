@@ -2,15 +2,20 @@
 import type { CamposExtrasType, } from '@/services/http/campos-extras/types';
 import { defineProps, onMounted, computed } from 'vue';
 
+const model = defineModel<any>('model')
+
 const props = defineProps<{
     field: CamposExtrasType
 }>()
+
+//EXEMPLO DE REGEX VALIDO '^[A-Z]{3}-[0-9A-Z]{4}'
 
 
 const validators = {
     required: (v: any) => props.field.is_required ? !!v || 'Campo obrigatório' : true,
     pattern: (value: string) => {
         const regex = props.field.validation.pattern ? new RegExp(props.field.validation.pattern) : null
+
         if (!regex) return true
         return !value || regex.test(value) || 'Formato do campo inválido.'
     },
@@ -72,18 +77,20 @@ onMounted(() => {
 </script>
 
 <template>
-    <v-text-field v-if="props.field.data_type === 'TEXT'" :rules="[...validationRules]" :label="props.field.field_label"
-        :hint="props.field.field_description" persistent-hint variant="outlined"
-        :minlength="props.field.validation.min_length || 3" :maxlength="props.field.validation.max_length || 6" />
-
-    <v-number-input v-if="props.field.data_type === 'NUMERIC'" :rules="[...validationRules]" control-variant="hidden"
+    <v-text-field v-model:model-value="model" v-if="props.field.data_type === 'TEXT'" :rules="[...validationRules]"
         :label="props.field.field_label" :hint="props.field.field_description" persistent-hint variant="outlined"
-        :min="props.field.validation.min_value || 12" :max="props.field.validation.max_value || 15" />
+        :minlength="props.field.validation.min_length || undefined"
+        :maxlength="props.field.validation.max_length || undefined" />
+
+    <v-number-input v-model:model-value="model" v-if="props.field.data_type === 'NUMERIC'" :rules="[...validationRules]"
+        control-variant="hidden" :label="props.field.field_label" :hint="props.field.field_description" persistent-hint
+        variant="outlined" :min="props.field.validation.min_value || undefined"
+        :max="props.field.validation.max_value || undefined" />
 
     <v-card v-if="props.field.data_type === 'BOOLEAN'" :rules="[...validationRules]" variant="text">
         <p class="question-text mb-3">{{ props.field.field_label }}</p>
-        <v-btn-toggle variant="outlined" divided mandatory class="w-100" :hint="props.field.field_description"
-            persistent-hint>
+        <v-btn-toggle v-model:model-value="model" variant="outlined" divided mandatory class="w-100"
+            :hint="props.field.field_description" persistent-hint>
             <v-btn color="primary" :value="true" class="flex-grow-1">
                 <v-icon start>mdi-check</v-icon>
                 Sim
@@ -93,21 +100,23 @@ onMounted(() => {
                 Não
             </v-btn>
         </v-btn-toggle>
-        <span class="text-caption text-grey-darken-1">{{ props.field.field_description }}</span>
+        <span class="text-caption font-weight-medium dark:text-white">{{ props.field.field_description }}</span>
     </v-card>
 
-    <v-text-field v-if="props.field.data_type === 'DATE'" :rules="[...validationRules]" type="date"
-        :label="props.field.field_label" :hint="props.field.field_description" persistent-hint variant="outlined" />
+    <v-text-field v-model:model-value="model" v-if="props.field.data_type === 'DATE'" :rules="[...validationRules]"
+        type="date" :label="props.field.field_label" :hint="props.field.field_description" persistent-hint
+        variant="outlined" />
 
-    <v-text-field v-if="props.field.data_type === 'TIME'" :rules="[...validationRules]" type="time"
-        :label="props.field.field_label" :hint="props.field.field_description" persistent-hint variant="outlined" />
+    <v-text-field v-model:model-value="model" v-if="props.field.data_type === 'TIME'" :rules="[...validationRules]"
+        type="time" :label="props.field.field_label" :hint="props.field.field_description" persistent-hint
+        variant="outlined" />
 
-    <v-select v-if="props.field.data_type === 'SELECT'" :rules="[...validationRules]" clearable
-        :label="props.field.field_label" :hint="props.field.field_description" persistent-hint variant="outlined"
-        :items="props.field.select_options || []" />
+    <v-select v-model:model-value="model" v-if="props.field.data_type === 'SELECT'" :rules="[...validationRules]"
+        clearable :label="props.field.field_label" :hint="props.field.field_description" persistent-hint
+        variant="outlined" :items="props.field.select_options || []" />
 
-    <v-select v-if="props.field.data_type === 'MULTISELECT'" :rules="[...validationRules]" multiple clearable chips
-        :label="props.field.field_label" :hint="props.field.field_description" persistent-hint variant="outlined"
-        :items="props.field.select_options || []" />
+    <v-select v-model:model-value="model" v-if="props.field.data_type === 'MULTISELECT'" :rules="[...validationRules]"
+        multiple clearable chips :label="props.field.field_label" :hint="props.field.field_description" persistent-hint
+        variant="outlined" :items="props.field.select_options || []" />
 
 </template>

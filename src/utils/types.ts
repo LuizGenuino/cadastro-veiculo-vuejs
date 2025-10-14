@@ -38,6 +38,7 @@ export type CadastroVeiculoType = {
     kmRodado: number;
     estadoConservacao: string;
     motivoVenda: string;
+    campos_extras: Record<string, any>;
     fotos_obrigatorias: Partial<Record<requiredPhotosKey, PhotoData>>;
     fotos_opcionais: Partial<Record<optionalPhotosKey, PhotoData>>;
 

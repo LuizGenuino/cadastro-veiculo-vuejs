@@ -73,7 +73,7 @@ async function onSubmit() {
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        const token = '123';
+        const token = router.currentRoute.value.params as { token?: string }
 
         form.value.etapa_atual = 'imagens-veiculo';
 
@@ -81,7 +81,8 @@ async function onSubmit() {
 
         loadingStore.hidden()
 
-        router.push({ path: `/imagens-veiculo/${token}` });
+        console.log(form.value);
+        router.push({ path: `/imagens-veiculo/${token.token}` });
 
     } catch (error) {
         console.error("Erro ao salvar informações:", error);
@@ -154,9 +155,10 @@ onMounted(() => {
             <v-icon color="primary" class="me-2">mdi-clipboard-check-outline</v-icon>
             Dados Extras
         </h3>
-         <vehicle-extra-fields-form
-                v-if="controleDadosExtras && controleDadosExtras.total > 0 && camposDadosExtras && camposDadosExtras.length > 0"
-                :controle-dados-extras="controleDadosExtras" :campos-dados-extras="camposDadosExtras" />
+        <vehicle-extra-fields-form
+            v-if="controleDadosExtras && controleDadosExtras.total > 0 && camposDadosExtras && camposDadosExtras.length > 0"
+            :controle-dados-extras="controleDadosExtras" :campos-dados-extras="camposDadosExtras"
+            v-model:extra-fields-model="form" />
     </v-form-card>
 </template>
 
