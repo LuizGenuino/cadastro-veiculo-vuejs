@@ -86,7 +86,7 @@ const fieldComponent = computed(() => componentMap[props.field.data_type]);
 
 <template>
     <v-card v-if="props.field.data_type === 'BOOLEAN'" variant="text">
-        <p class="question-text mb-3">{{ props.field.field_label }}</p>
+        <p class="question-text mb-1">{{ props.field.field_label }}</p>
         <v-btn-toggle v-model="model" variant="outlined" divided mandatory class="w-100">
             <v-btn color="primary" :value="true" class="flex-grow-1">
                 <v-icon start>mdi-check</v-icon> Sim
@@ -95,7 +95,8 @@ const fieldComponent = computed(() => componentMap[props.field.data_type]);
                 <v-icon start>mdi-close</v-icon> Não
             </v-btn>
         </v-btn-toggle>
-        <span class="text-caption font-weight-medium mt-2 d-block text-span">{{ props.field.field_description }}</span>
+        <span class="text-caption font-weight-medium mt-2 d-block text-span">{{ props.field.field_description
+        }}</span>
     </v-card>
 
     <component v-else-if="fieldComponent" :is="fieldComponent" v-model="model"

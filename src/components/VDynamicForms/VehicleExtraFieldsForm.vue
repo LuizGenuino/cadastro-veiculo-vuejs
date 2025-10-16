@@ -51,9 +51,7 @@ watchEffect(() => {
 <template>
     <div v-if="groupedFields.length > 0">
         <div v-for="group in groupedFields" :key="group.title" class="mb-4">
-            <v-col cols="12">
-                <field-group v-if="group.fields.length > 0" :group="group" v-model:extra-fields-model="model" />
-            </v-col>
+            <field-group v-if="group.fields.length > 0" :group="group" v-model:extra-fields-model="model" />
         </div>
     </div>
 </template>

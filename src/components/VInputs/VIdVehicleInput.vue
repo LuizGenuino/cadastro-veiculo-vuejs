@@ -67,11 +67,6 @@ watch(model, (newVal) => {
 
 })
 
-function toggleType() {
-    internalType.value = internalType.value === 'placa' ? 'chassi' : 'placa'
-    model.value = ''
-}
-
 </script>
 
 <template>
@@ -79,10 +74,10 @@ function toggleType() {
         <v-text-field v-model:model-value="model" :rules="validationRules" :label="props.label" variant="outlined"
             :readonly="props.loading" :loading="props.loading" maxlength="17" prepend-inner-icon="mdi-motorbike">
             <template #append-inner>
-                <v-btn color="primary" :text="internalType" variant="flat" @click="toggleType" size="x-small" />
+                <p class="bg-primary px-4 py-1 rounded-lg text-caption cursor-pointer" size="x-small">{{internalType}}</p>
             </template>
         </v-text-field>
     </div>
 </template>
 
-<style scoped></style>
+<style scoped></style>s
