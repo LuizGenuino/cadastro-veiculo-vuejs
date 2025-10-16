@@ -144,7 +144,7 @@ watch(isModalVisible, (newValue) => {
 </script>
 
 <template>
-    <v-dialog v-model="isModalVisible" max-width="95vw" max-height="95vh" class="pa-1" persistent>
+    <v-dialog v-model="isModalVisible" width="95vw" max-width="1100" max-height="95vh" class="pa-1" persistent>
         <v-card v-if="props.selectedPhotoKey && foto">
             <v-card-title class="d-flex justify-space-between align-center">
                 <span>{{ props.titulo }}</span>

@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<{
     loading: false,
     submitText: 'Salvar',
     cardWidth: '95%',
-    cardMaxWidth: 460,
+    cardMaxWidth: 500,
 })
 const formVerification = defineModel<boolean>('formVerification', { default: true });
 
