@@ -71,7 +71,7 @@ async function onSubmit() {
         form.value.estadoConservacao = formState.estadoConservacao;
         form.value.motivoVenda = formState.motivoVenda;
 
-        await new Promise(resolve => setTimeout(resolve, 15000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
         const token = router.currentRoute.value.params as { token?: string }
 
@@ -96,7 +96,6 @@ async function fetchVehicleExtraFields() {
     isLoading.value = true;
     loadingStore.show('Carregando campos extras...')
     try {
-        await new Promise(resolve => setTimeout(resolve, 15000));
         const response = await httpService.camposExtras.list()
         if (response.isRight()) {
             controleDadosExtras.value = response.value?.control.metadata as MetadataType
