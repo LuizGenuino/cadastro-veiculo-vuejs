@@ -62,14 +62,14 @@ const componentMap: Record<string, any> = {
 };
 
 const commonProps = computed(() => ({
-    label: `${props.field.field_label}${props.field.is_required && '*'}`,
+    label: `${props.field.field_label}${props.field.is_required ? '*' : ''}`,
     hint: props.field.field_description,
     persistentHint: true,
     variant: 'outlined',
     rules: validationRules.value,
     placeholder: props.field.display.placeholder,
     readonly: props.isLoading,
-    loading:props.isLoading
+    loading: props.isLoading
 }));
 
 const specificProps = computed(() => {
@@ -90,7 +90,14 @@ const fieldComponent = computed(() => componentMap[props.field.data_type]);
 
 <template>
     <v-card v-if="props.field.data_type === 'BOOLEAN'" variant="text">
-        <p class="question-text mb-1">{{ props.field.field_label }}{{ props.field.is_required && '*' }}</p>
+        <p class="question-text mb-1 d-flex align-center">{{ props.field.field_label }}{{ props.field.is_required ? '*'
+            : '' }}
+            <v-tooltip v-if="props.field.display.help_text" :text="props.field.display.help_text" location="bottom">
+                <template v-slot:activator="{ props }">
+                    <div class="ml-2 border-md text-error  border-error  rounded-pill px-2" v-bind="props">?</div>
+                </template>
+            </v-tooltip>
+        </p>
         <v-btn-toggle v-model="model" variant="outlined" divided mandatory class="w-100">
             <v-btn color="primary" :value="true" class="flex-grow-1">
                 <v-icon start>mdi-check</v-icon> Sim
@@ -100,9 +107,17 @@ const fieldComponent = computed(() => componentMap[props.field.data_type]);
             </v-btn>
         </v-btn-toggle>
         <span class="text-caption font-weight-medium mt-2 d-block text-span">{{ props.field.field_description
-        }}</span>
+            }}</span>
     </v-card>
 
     <component v-else-if="fieldComponent" :is="fieldComponent" v-model="model"
-        v-bind="{ ...commonProps, ...specificProps }" />
+        v-bind="{ ...commonProps, ...specificProps }">
+        <template #append-inner>
+            <v-tooltip v-if="props.field.display.help_text" :text="props.field.display.help_text" location="bottom">
+                <template v-slot:activator="{ props }">
+                    <div class="border-md text-error  border-error  rounded-pill px-2" v-bind="props">?</div>
+                </template>
+            </v-tooltip>
+        </template>
+    </component>
 </template>
