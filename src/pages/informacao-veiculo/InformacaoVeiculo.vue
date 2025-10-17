@@ -71,7 +71,7 @@ async function onSubmit() {
         form.value.estadoConservacao = formState.estadoConservacao;
         form.value.motivoVenda = formState.motivoVenda;
 
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 15000));
 
         const token = router.currentRoute.value.params as { token?: string }
 
@@ -96,6 +96,7 @@ async function fetchVehicleExtraFields() {
     isLoading.value = true;
     loadingStore.show('Carregando campos extras...')
     try {
+        await new Promise(resolve => setTimeout(resolve, 15000));
         const response = await httpService.camposExtras.list()
         if (response.isRight()) {
             controleDadosExtras.value = response.value?.control.metadata as MetadataType
@@ -154,10 +155,12 @@ onMounted(() => {
             <v-icon color="primary" class="me-2">mdi-clipboard-check-outline</v-icon>
             Dados Extras
         </h3>
-        <vehicle-extra-fields-form
-            v-if="controleDadosExtras && controleDadosExtras.total > 0 && camposDadosExtras && camposDadosExtras.length > 0"
-            :controle-dados-extras="controleDadosExtras" :campos-dados-extras="camposDadosExtras"
-            v-model:extra-fields-model="form" />
+        <v-skeleton-loader
+            v-if="(!controleDadosExtras || controleDadosExtras.total === 0) || (!camposDadosExtras || camposDadosExtras.length === 0) || !loadingStore.state"
+            type="card"></v-skeleton-loader>
+        <vehicle-extra-fields-form v-else :controle-dados-extras="controleDadosExtras"
+            :campos-dados-extras="camposDadosExtras" v-model:extra-fields-model="form" :is-loading="isLoading" />
+
     </v-form-card>
 </template>
 

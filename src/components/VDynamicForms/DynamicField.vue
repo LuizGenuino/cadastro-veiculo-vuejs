@@ -7,7 +7,8 @@ import { VTextField, VSelect, VNumberInput } from 'vuetify/components';
 const model = defineModel<unknown>('model');
 
 const props = defineProps<{
-    field: CamposExtrasType
+    field: CamposExtrasType,
+    isLoading: boolean
 }>();
 
 const patternRegex = computed(() => {
@@ -61,11 +62,14 @@ const componentMap: Record<string, any> = {
 };
 
 const commonProps = computed(() => ({
-    label: props.field.field_label,
+    label: `${props.field.field_label}${props.field.is_required && '*'}`,
     hint: props.field.field_description,
     persistentHint: true,
     variant: 'outlined',
     rules: validationRules.value,
+    placeholder: props.field.display.placeholder,
+    readonly: props.isLoading,
+    loading:props.isLoading
 }));
 
 const specificProps = computed(() => {
@@ -86,7 +90,7 @@ const fieldComponent = computed(() => componentMap[props.field.data_type]);
 
 <template>
     <v-card v-if="props.field.data_type === 'BOOLEAN'" variant="text">
-        <p class="question-text mb-1">{{ props.field.field_label }}</p>
+        <p class="question-text mb-1">{{ props.field.field_label }}{{ props.field.is_required && '*' }}</p>
         <v-btn-toggle v-model="model" variant="outlined" divided mandatory class="w-100">
             <v-btn color="primary" :value="true" class="flex-grow-1">
                 <v-icon start>mdi-check</v-icon> Sim

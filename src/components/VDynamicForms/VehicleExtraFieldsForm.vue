@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineModel, defineProps, watchEffect } from 'vue';
+import { computed, defineModel, defineProps, watchEffect, ref } from 'vue';
 import type { CamposExtrasType, MetadataType } from '@/services/http/campos-extras/types';
 import type { CadastroVeiculoType } from '@/utils/types';
 
@@ -8,7 +8,10 @@ const model = defineModel<Partial<CadastroVeiculoType>>('extraFieldsModel', { re
 const props = defineProps<{
     controleDadosExtras: MetadataType,
     camposDadosExtras: CamposExtrasType[],
+    isLoading: boolean
 }>();
+
+const panel = ref<number[]>([])
 
 const groupedFields = computed(() => {
     const groups = props.controleDadosExtras?.groups;
@@ -18,7 +21,7 @@ const groupedFields = computed(() => {
         return [];
     }
 
-    return groups.map(groupTitle => {
+    return groups.map((groupTitle, index) => {
         const groupFields = fields
             .filter(field => field.display.group === groupTitle)
             .sort((a, b) => a.display.order - b.display.order);
@@ -46,12 +49,24 @@ watchEffect(() => {
     });
 });
 
+onMounted(() => {
+    const groups = props.controleDadosExtras?.groups || [];
+    panel.value = Array.from({ length: groups.length }, (_, index) => index);
+})
+
 </script>
 
 <template>
     <div v-if="groupedFields.length > 0">
-        <div v-for="group in groupedFields" :key="group.title" class="mb-4">
-            <field-group v-if="group.fields.length > 0" :group="group" v-model:extra-fields-model="model" />
-        </div>
+        <v-expansion-panels v-model="panel" variant="popout" multiple>
+            <v-expansion-panel v-for="group in groupedFields" :key="group.title" class="mb-4">
+                <v-expansion-panel-title class="text-subtitle-1 font-weight-bold">
+                    {{ group.title }}
+                </v-expansion-panel-title>
+                <v-expansion-panel-text>
+                    <field-group v-if="group.fields.length > 0" :group="group" v-model:extra-fields-model="model" :isLoading="isLoading" />
+                </v-expansion-panel-text>
+            </v-expansion-panel>
+        </v-expansion-panels>
     </div>
 </template>
