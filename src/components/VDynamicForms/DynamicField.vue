@@ -92,22 +92,17 @@ const fieldComponent = computed(() => componentMap[props.field.data_type]);
     <v-card v-if="props.field.data_type === 'BOOLEAN'" variant="text">
         <p class="question-text mb-1 d-flex align-center">{{ props.field.field_label }}{{ props.field.is_required ? '*'
             : '' }}
-            <v-tooltip v-if="props.field.display.help_text" :text="props.field.display.help_text" location="bottom">
+            <v-tooltip v-if="props.field.display.help_text" :text="props.field.display.help_text"
+                location="bottom">
                 <template v-slot:activator="{ props }">
-                    <div class="ml-2 border-md text-error  border-error  rounded-pill px-2" v-bind="props">?</div>
+                    <div class="ml-2 border-md text-error  border-error  rounded-pill px-1" v-bind="props">?</div>
                 </template>
             </v-tooltip>
         </p>
-        <v-btn-toggle v-model="model" variant="outlined" divided mandatory class="w-100">
-            <v-btn color="primary" :value="true" class="flex-grow-1">
-                <v-icon start>mdi-check</v-icon> Sim
-            </v-btn>
-            <v-btn color="error" :value="false" class="flex-grow-1">
-                <v-icon start>mdi-close</v-icon> Não
-            </v-btn>
-        </v-btn-toggle>
-        <span class="text-caption font-weight-medium mt-2 d-block text-span">{{ props.field.field_description
-            }}</span>
+        <v-radio-group v-model="model" inline v-bind="{ ...commonProps, label: undefined }">
+            <v-radio color="success" label="Sim" value="sim"></v-radio>
+            <v-radio color="error" label="Não" value="não"></v-radio>
+        </v-radio-group>
     </v-card>
 
     <component v-else-if="fieldComponent" :is="fieldComponent" v-model="model"

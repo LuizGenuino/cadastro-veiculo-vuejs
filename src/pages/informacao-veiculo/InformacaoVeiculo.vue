@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { httpService } from '@/services/http';
-import type { CamposExtrasType, MetadataType } from '@/services/http/campos-extras/types';
 import { useLoading } from '@/stores/loading';
 import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
@@ -23,13 +21,6 @@ const loadingStore = useLoading()
 const veiculoStore = useVeiculo()
 
 const form = ref<Partial<CadastroVeiculoType>>({});
-
-const controleDadosExtras = ref<MetadataType>({
-    total: 0,
-    groups: []
-})
-
-const camposDadosExtras = ref<CamposExtrasType[]>()
 
 const formState = reactive<FormStateType>({
     valorDesejado: '',
@@ -92,31 +83,20 @@ async function onSubmit() {
     }
 }
 
-async function fetchVehicleExtraFields() {
-    isLoading.value = true;
-    loadingStore.show('Carregando campos extras...')
-    try {
-        const response = await httpService.camposExtras.list()
-        if (response.isRight()) {
-            controleDadosExtras.value = response.value?.control.metadata as MetadataType
-            camposDadosExtras.value = response.value?.data as CamposExtrasType[]
-        }
-    } catch (error) {
-        console.error("Erro ao buscar dados do veículo:", error);
-        toast('Ocorreu um erro ao carregar os dados do veículo.', 'error');
-    } finally {
-        loadingStore.hidden()
-        isLoading.value = false
-    }
-}
-
 onMounted(() => {
-    fetchVehicleExtraFields();
     const data: Partial<CadastroVeiculoType> = veiculoStore.get();
     form.value = { ...data };
     Object.assign(formState, data);
 
 });
+
+onUnmounted(async () => {
+    form.value.valorDesejado = Number(formState.valorDesejado.replace('.', '')) || 0;
+    form.value.kmRodado = Number(formState.kmRodado.replace('.', '')) || 0;
+    form.value.estadoConservacao = formState.estadoConservacao;
+    form.value.motivoVenda = formState.motivoVenda;
+    await veiculoStore.set(form.value as CadastroVeiculoType);
+})
 
 </script>
 
@@ -154,11 +134,8 @@ onMounted(() => {
             <v-icon color="primary" class="me-2">mdi-clipboard-check-outline</v-icon>
             Dados Extras
         </h3>
-        <v-skeleton-loader
-            v-if="(!controleDadosExtras || controleDadosExtras.total === 0) || (!camposDadosExtras || camposDadosExtras.length === 0) || !loadingStore.state"
-            type="card"></v-skeleton-loader>
-        <vehicle-extra-fields-form v-else :controle-dados-extras="controleDadosExtras"
-            :campos-dados-extras="camposDadosExtras" v-model:extra-fields-model="form" :is-loading="isLoading" />
+
+        <vehicle-extra-fields-form v-model:extra-fields-model="form" v :is-loading="isLoading" />
 
     </v-form-card>
 </template>

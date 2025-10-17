@@ -1,23 +1,29 @@
 <script setup lang="ts">
-import { computed, defineModel, defineProps, watchEffect, ref } from 'vue';
+import { computed, defineModel, defineProps, watch, ref, onMounted } from 'vue';
 import type { CamposExtrasType, MetadataType } from '@/services/http/campos-extras/types';
 import type { CadastroVeiculoType } from '@/utils/types';
+import { useLoading } from '@/stores/loading';
+import { toast } from '@/utils/swal/toast';
+import { httpService } from '@/services/http';
 
+const loadingStore = useLoading();
 const model = defineModel<Partial<CadastroVeiculoType>>('extraFieldsModel', { required: true });
 
 const props = defineProps<{
-    controleDadosExtras: MetadataType,
-    camposDadosExtras: CamposExtrasType[],
-    isLoading: boolean
+    isLoading: boolean;
 }>();
 
-const panel = ref<number[]>([])
+const isLoadingFields = ref(true);
+
+const controleDadosExtras = ref<MetadataType>({ total: 0, groups: [] });
+const camposDadosExtras = ref<CamposExtrasType[]>([]);
+const panel = ref<number[]>([]);
 
 const groupedFields = computed(() => {
-    const groups = props.controleDadosExtras?.groups;
-    const fields = props.camposDadosExtras;
+    const groups = controleDadosExtras.value.groups;
+    const fields = camposDadosExtras.value;
 
-    if (!groups?.length || !fields?.length) {
+    if (!groups.length || !fields.length) {
         return [];
     }
 
@@ -25,39 +31,65 @@ const groupedFields = computed(() => {
         const groupFields = fields
             .filter(field => field.display.group === groupTitle)
             .sort((a, b) => a.display.order - b.display.order);
-
         return { title: groupTitle, fields: groupFields };
     });
 });
 
-
 watchEffect(() => {
-    if (!model.value || !props.camposDadosExtras?.length) {
+    if (!model.value || !camposDadosExtras.value.length) {
         return;
     }
-
     if (!model.value.campos_extras) {
         model.value.campos_extras = {};
     }
-
     const currentExtras = model.value.campos_extras;
-
-    props.camposDadosExtras.forEach(field => {
+    camposDadosExtras.value.forEach(field => {
         if (!(field.field_key in currentExtras)) {
             currentExtras[field.field_key] = undefined;
         }
     });
 });
 
+
+watch(
+    () => controleDadosExtras.value.groups,
+    (newGroups) => {
+        if (newGroups && newGroups.length > 0) {
+            panel.value = [...Array(newGroups.length).keys()];
+        }
+    },
+    { once: true }
+);
+
+async function fetchVehicleExtraFields() {
+    loadingStore.show('Carregando campos extras...');
+    isLoadingFields.value = true;
+    try {
+        const response = await httpService.camposExtras.list();
+        if (response.isRight()) {
+            controleDadosExtras.value = response.value?.control.metadata as MetadataType;
+            camposDadosExtras.value = response.value?.data as CamposExtrasType[];
+        }
+        loadingStore.hidden();
+    } catch (error) {
+        console.error("Erro ao buscar campos extras:", error);
+        toast('Ocorreu um erro ao carregar os campos extras.', 'error');
+    } finally {
+        loadingStore.hidden();
+        isLoadingFields.value = false;
+    }
+}
+
 onMounted(() => {
-    const groups = props.controleDadosExtras?.groups || [];
-    panel.value = Array.from({ length: groups.length }, (_, index) => index);
-})
+    fetchVehicleExtraFields();
+});
 
 </script>
 
 <template>
-    <div v-if="groupedFields.length > 0">
+    <v-skeleton-loader v-if="isLoadingFields" type="card@3"></v-skeleton-loader>
+
+    <div v-else-if="groupedFields.length > 0">
         <v-expansion-panels v-model="panel" variant="popout" multiple>
             <v-expansion-panel v-for="group in groupedFields" :key="group.title" class="mb-4">
                 <v-expansion-panel-title class="text-subtitle-1 font-weight-bold">
@@ -65,9 +97,13 @@ onMounted(() => {
                 </v-expansion-panel-title>
                 <v-expansion-panel-text>
                     <field-group v-if="group.fields.length > 0" :group="group" v-model:extra-fields-model="model"
-                        :isLoading="isLoading" />
+                        :isLoading="props.isLoading" />
                 </v-expansion-panel-text>
             </v-expansion-panel>
         </v-expansion-panels>
+    </div>
+
+    <div v-else class="text-center text-grey pa-4">
+        <p>Nenhum campo extra encontrado.</p>
     </div>
 </template>
