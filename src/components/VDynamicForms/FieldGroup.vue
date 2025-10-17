@@ -24,8 +24,8 @@ const defineCols = (type: string): number => {
 </script>
 
 <template>
-    <v-row justify="space-between" align="center" v-if="group.fields?.length" class="mt-2">
-        <v-col cols="12" :md="defineCols(field.data_type)" v-for="field in group.fields" :key="field.field_key"
+    <v-row justify="space-between" align="center" v-if="props.group.fields?.length" class="mt-2">
+        <v-col cols="12" :md="defineCols(field.data_type)" v-for="field in props.group.fields" :key="field.field_key"
             class="mb-4">
             <dynamic-field :field="field" v-model:model="formValues[field.field_key]" :isLoading="isLoading" />
         </v-col>

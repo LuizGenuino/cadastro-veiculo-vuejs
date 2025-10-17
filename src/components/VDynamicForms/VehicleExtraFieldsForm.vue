@@ -21,7 +21,7 @@ const groupedFields = computed(() => {
         return [];
     }
 
-    return groups.map((groupTitle, index) => {
+    return groups.map((groupTitle) => {
         const groupFields = fields
             .filter(field => field.display.group === groupTitle)
             .sort((a, b) => a.display.order - b.display.order);
@@ -64,7 +64,8 @@ onMounted(() => {
                     {{ group.title }}
                 </v-expansion-panel-title>
                 <v-expansion-panel-text>
-                    <field-group v-if="group.fields.length > 0" :group="group" v-model:extra-fields-model="model" :isLoading="isLoading" />
+                    <field-group v-if="group.fields.length > 0" :group="group" v-model:extra-fields-model="model"
+                        :isLoading="isLoading" />
                 </v-expansion-panel-text>
             </v-expansion-panel>
         </v-expansion-panels>

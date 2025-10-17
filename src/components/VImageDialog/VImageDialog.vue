@@ -167,10 +167,12 @@ watch(isModalVisible, (newValue) => {
                     <v-btn class="mx-2" icon="mdi-magnify-minus" @click="updateZoom(-0.2)" :disabled="zoomLevel <= 1" />
                     <v-btn class="mx-2" icon="mdi-magnify-plus" @click="updateZoom(0.2)" :disabled="zoomLevel >= 3" />
                 </v-btn-toggle>
-                <div class="w-100 d-flex justify-space-between align-center" >
+                <div class="w-100 d-flex justify-space-between align-center">
                     <v-btn variant="flat" prepend-icon="mdi-delete" color="error" text="Remover"
-                        @click.stop="removePhoto(props.selectedPhotoKey), isModalVisible = false" :disabled="isLoading" />
-                    <v-btn variant="flat" prepend-icon="mdi-content-save" color="success"  text="Salvar" @click="applyAndSaveRotation" :loading="isLoading" />
+                        @click.stop="removePhoto(props.selectedPhotoKey), isModalVisible = false"
+                        :disabled="isLoading" />
+                    <v-btn variant="flat" prepend-icon="mdi-content-save" color="success" text="Salvar"
+                        @click="applyAndSaveRotation" :loading="isLoading" />
                 </div>
             </v-card-actions>
         </v-card>

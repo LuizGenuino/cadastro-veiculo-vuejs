@@ -3,7 +3,7 @@ import { useLoading } from '@/stores/loading';
 import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
 import { FOTOS_OBRIGATORIAS, type CadastroVeiculoType, type PhotoData, type requiredPhotosKey } from '@/utils/types';
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, defineModel } from 'vue'
 import { useRouter } from 'vue-router'
 
 
