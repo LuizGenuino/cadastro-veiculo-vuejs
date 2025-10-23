@@ -1,22 +1,21 @@
 <script setup lang="ts">
+import type { VeiculosFipeType } from '@/services/http/cadastro-veiculo/types';
 import { useLoading } from '@/stores/loading';
 import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
-import type { CadastroVeiculoType, VeiculoType } from '@/utils/types';
+import type { CadastroVeiculoType } from '@/utils/types';
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-const router = useRouter();
+const router = useRouter()
+const loadingStore = useLoading()
+const veiculoStore = useVeiculo()
 
-const veiculosDisponiveis = ref<VeiculoType[]>([
-    { uid: '1', placa: 'ABC-1234', marca: 'Honda', modelo: 'XRE 300/ 300 ABS/ FLEX', ano: '2019', valor_fipe: 'R$ 22.150,00' },
-    { uid: '2', placa: 'ABC-1234', marca: 'Yamaha', modelo: 'FZ15 150 FAZER FLEX', ano: '2023', valor_fipe: 'R$ 17.590,00' },
-    { uid: '3', placa: 'ABC-1234', marca: 'Honda', modelo: 'CG 160 TITAN FLEXONE/Ed.Especial 40 Anos', ano: '2018', valor_fipe: 'R$ 13.770,00' }
-]);
+const veiculosDisponiveis = ref<VeiculosFipeType[]>([]);
 
 const form = ref<Partial<CadastroVeiculoType>>({});
 
-const veiculoSelecionado = ref<VeiculoType | null>(null);
+const veiculoSelecionado = ref<VeiculosFipeType | null>(null);
 const isLoading = ref(false);
 
 
@@ -30,49 +29,50 @@ async function onSubmit() {
 
     isLoading.value = true;
     try {
-        useLoading().show("Salvando Escolha....")
-        form.value.id_veiculo_fipe = veiculoSelecionado.value.uid;
-        form.value.valor_fipe = veiculoSelecionado.value.valor_fipe;
+        loadingStore.show("Salvando Escolha....")
+        form.value.id_veiculo_fipe = veiculoSelecionado.value.id
+        form.value.codigo_fipe = veiculoSelecionado.value.fipe_codigo
+        form.value.ano_fabricacao = veiculoSelecionado.value.ano
+        form.value.ano_modelo = veiculoSelecionado.value.ano_modelo
+        form.value.marca = veiculoSelecionado.value.marca
+        form.value.modelo = veiculoSelecionado.value.modelo
+        form.value.valor_fipe = veiculoSelecionado.value.preco
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        const token = '123';
+        const token = router.currentRoute.value.params as { token?: string }
 
         form.value.etapa_atual = 'informacao-veiculo';
 
-        await useVeiculo().set(form.value as CadastroVeiculoType);
+        await veiculoStore.set(form.value as CadastroVeiculoType)
 
-        useLoading().hidden()
+        loadingStore.hidden()
 
-        router.push({ path: `/informacao-veiculo/${token}` });
+        router.push({ path: `/informacao-veiculo/${token.token}` });
 
     } catch (error) {
         console.error("Erro ao selecionar a versão:", error);
         toast('Ocorreu um erro. Tente novamente.', 'error');
     } finally {
-        useLoading().hidden()
+        loadingStore.hidden()
         isLoading.value = false;
     }
 }
 
-
 onMounted(() => {
-    if (veiculosDisponiveis.value.length === 0) {
-        const token = '123';
-        form.value.etapa_atual = 'informacao-veiculo';
-        router.replace({ path: `/informacao-veiculo/${token}` });
-        return;
+    const savedData =  veiculoStore.get()
+    form.value = { ...savedData }
+    
+    if (savedData.lista_veiculos_fipe && savedData.lista_veiculos_fipe.length > 1) {
+        veiculosDisponiveis.value = savedData.lista_veiculos_fipe;
+        
     }
-    const data: Partial<CadastroVeiculoType> = useVeiculo().get();
-    form.value = { ...data };
-    if (data.id_veiculo_fipe) {
-        const veiculo = veiculosDisponiveis.value.find(v => v.uid === data.id_veiculo_fipe);
-        if (veiculo) {
-            veiculoSelecionado.value = veiculo;
-        }
+    if (form.value.id_veiculo_fipe && form.value.id_veiculo_fipe !== "") {
+        veiculoSelecionado.value = veiculosDisponiveis.value.find(veiculo => form.value.id_veiculo_fipe === veiculo.id) || null
     }
-});
 
+
+})
 
 </script>
 
@@ -82,12 +82,12 @@ onMounted(() => {
         <v-card-subtitle class="page-subtitle text-center mb-6">passo 1 de 4</v-card-subtitle>
         <v-radio-group v-model="veiculoSelecionado">
             <v-row class="w-100">
-                <v-col v-for="veiculo in veiculosDisponiveis" :key="veiculo.uid" cols="12">
+                <v-col v-for="veiculo in veiculosDisponiveis" :key="veiculo.id" cols="12">
                     <v-radio :value="veiculo" color="primary" class="justify-center align-center items-center ">
                         <template #label>
                             <v-card class="rounded-xl w-full min-width"
-                                :variant="veiculoSelecionado?.uid === veiculo.uid ? 'tonal' : 'elevated'"
-                                :color="veiculoSelecionado?.uid === veiculo.uid ? 'primary' : 'bg-component'"
+                                :variant="veiculoSelecionado?.id === veiculo.id ? 'tonal' : 'elevated'"
+                                :color="veiculoSelecionado?.id === veiculo.id ? 'primary' : 'bg-component'"
                                 elevation="2">
                                 <v-card-text>
                                     <div class="mb-2 ">
@@ -97,17 +97,14 @@ onMounted(() => {
                                         <p
                                             class="text-body-2 font-weight-bold text-medium-emphasis d-flex justify-space-between align-center">
                                             {{ veiculo.marca }}
-                                            <v-chip size="small" color="primary" variant="tonal" class="me-2">
-                                                {{ veiculo.placa }}
-                                            </v-chip>
                                             <v-chip size="small" color="secondary" variant="tonal">
-                                                {{ veiculo.ano }}
+                                                {{ veiculo.ano }} / {{ veiculo.ano_modelo }}
                                             </v-chip>
                                         </p>
                                     </div>
                                     <div class="d-flex justify-center align-center">
                                         <div class="text-center">
-                                            <p class="font-weight-bold text-primary">{{ veiculo.valor_fipe }}</p>
+                                            <p class="font-weight-bold text-primary">{{ veiculo.preco }}</p>
                                             <p class="text-caption text-medium-emphasis">Valor FIPE</p>
                                         </div>
                                     </div>

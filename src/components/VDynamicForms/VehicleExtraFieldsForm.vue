@@ -63,14 +63,15 @@ watch(
 
 async function fetchVehicleExtraFields() {
     loadingStore.show('Carregando campos extras...');
+    
     isLoadingFields.value = true;
+
     try {
         const response = await httpService.camposExtras.list();
         if (response.isRight()) {
             controleDadosExtras.value = response.value?.control.metadata as MetadataType;
             camposDadosExtras.value = response.value?.data as CamposExtrasType[];
         }
-        loadingStore.hidden();
     } catch (error) {
         console.error("Erro ao buscar campos extras:", error);
         toast('Ocorreu um erro ao carregar os campos extras.', 'error');

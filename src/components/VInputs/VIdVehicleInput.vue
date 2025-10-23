@@ -15,7 +15,7 @@ const props = defineProps({
 const rules = {
     required: (value: string) => !!value || 'O Campo é obrigatório',
     chassi_rule: (value: string) => {
-        const regex = /^[0-9A-Z]{17}$/
+        const regex = /^[A-HJ-NPR-Z0-9]{17}$/
         return !value || regex.test(value) || 'Formato inválido. Deve conter 17 caracteres'
     },
     place_rule: (value: string) => {
@@ -74,7 +74,8 @@ watch(model, (newVal) => {
         <v-text-field v-model:model-value="model" :rules="validationRules" :label="props.label" variant="outlined"
             :readonly="props.loading" :loading="props.loading" maxlength="17" prepend-inner-icon="mdi-motorbike">
             <template #append-inner>
-                <p class="bg-primary px-4 py-1 rounded-lg text-caption cursor-pointer" size="x-small">{{internalType}}</p>
+                <p class="bg-primary px-4 py-1 rounded-lg text-caption cursor-pointer" size="x-small">{{ internalType }}
+                </p>
             </template>
         </v-text-field>
     </div>

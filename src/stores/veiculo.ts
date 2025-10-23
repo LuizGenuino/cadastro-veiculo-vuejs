@@ -30,7 +30,9 @@ export const useVeiculo = defineStore('veiculo', () => {
 
     async function set(data: Partial<CadastroVeiculoType>) {
         state.value = { ...state.value, ...data }
+        
         const queryObj: Record<string, any> = transformDataToQueryParameters(state.value);
+        
         await router.replace({ query: queryObj });
     }
 

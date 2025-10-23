@@ -35,8 +35,9 @@ class AxiosInstance {
         return axiosInstance
     }
 
-    private getToken(): string | null {
+    private getToken(): string | null {    
         const params = router.currentRoute.value.params as { token?: string }
+        
         if (params && params?.token) {
             return params?.token
         }

@@ -1,7 +1,7 @@
 import type { RouteRecordRaw } from "vue-router";
 
 export const SelecionarVeiculoRoute: RouteRecordRaw = {
-    path: '/selecionar-veiculo/:token([0-9a-fA-F-]{3})',
+    path: '/selecionar-veiculo/:token([A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+)',
     name: 'SelecionarVeiculo',
     component: () => import('@/layouts/MainLayout.vue'),
     children: [

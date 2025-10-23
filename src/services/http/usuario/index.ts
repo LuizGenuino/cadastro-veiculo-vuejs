@@ -2,7 +2,7 @@ import { Right } from "@/utils/either/right";
 import { HttpBase } from "../http.base";
 import { Left } from "@/utils/either/left";
 import type { Either } from "@/utils/either";
-import type { UsuarioResponseType } from "./types";
+import type { UsuarioDataType } from "./types";
 import { fetchWithCache } from "../http.cache";
 
 export class HttpUsuario extends HttpBase {
@@ -12,13 +12,13 @@ export class HttpUsuario extends HttpBase {
 
     protected resource = '/p84/user'
 
-    async currentUser(): Promise<Either<null, UsuarioResponseType>> {
+    async currentUser(): Promise<Either<null, UsuarioDataType>> {
         try {
             const response = await fetchWithCache<any>(
                 this.http,
                 this.resource,
             );
-            return Right.create(response)
+            return Right.create(response.data)
         } catch {
             return Left.create(null)
         }

@@ -9,12 +9,14 @@ import { toast } from '@/utils/swal/toast'
 import type { CadastroVeiculoType } from '@/utils/types'
 import type { UserStoresType } from '@/services/http/usuario/types'
 import { useUsuario } from '@/stores/usuario'
+import type { VehicleRegistrationFormType, VeiculoDataType } from '@/services/http/cadastro-veiculo/types'
 
 const router = useRouter()
 const loadingStore = useLoading()
 const veiculoStore = useVeiculo()
 
 const form = ref<Partial<CadastroVeiculoType>>({})
+
 const lojasUsuario = ref<UserStoresType[]>([])
 const selectedStore = ref<UserStoresType | null>(null)
 const isFormValid = ref(false)
@@ -22,8 +24,79 @@ const isLoading = ref(false)
 
 const validators = {
     required: (v: string) => !!v || 'Campo obrigatório',
+    minLength: (v: string) => v.length > 3 || "Deve conter no minimo 3 caracteres"
 }
 
+
+function clearForm() {
+    form.value.id = undefined
+    form.value.id_loja_usuario = undefined
+    form.value.nome_loja_usuario = undefined
+    form.value.short_id = undefined
+    form.value.placa = undefined
+    form.value.chassi = undefined
+    form.value.id_veiculo_fipe = undefined
+    form.value.codigo_fipe = undefined
+    form.value.ano_fabricacao = undefined
+    form.value.ano_modelo = undefined
+    form.value.marca = undefined
+    form.value.modelo = undefined
+    form.value.valor_fipe = undefined
+    form.value.lista_veiculos_fipe = undefined
+}
+
+async function nextPage(data: VeiculoDataType) {
+    clearForm()
+
+    form.value.id = data.id
+    form.value.id_loja_usuario = data.store_id
+    form.value.nome_loja_usuario = data.store_name
+    form.value.short_id = data.short_id
+    form.value.placa = data.plate
+    form.value.chassi = data.chassis
+
+
+    const token = router.currentRoute.value.params as { token?: string }
+
+    if (data.fipes === null) {
+        form.value.etapa_atual = 'informacao-veiculo'
+
+        await veiculoStore.set(form.value as CadastroVeiculoType)
+
+        router.push({ path: `/informacao-veiculo/${token.token}` });
+        return
+    }
+
+    if (data.fipes?.length === 1) {
+        form.value.id_veiculo_fipe = data.fipes[0].id
+        form.value.codigo_fipe = data.fipes[0].fipe_codigo
+        form.value.ano_fabricacao = data.fipes[0].ano
+        form.value.ano_modelo = data.fipes[0].ano_modelo
+        form.value.marca = data.fipes[0].marca
+        form.value.modelo = data.fipes[0].modelo
+        form.value.valor_fipe = data.fipes[0].preco
+
+
+        form.value.etapa_atual = 'informacao-veiculo'
+
+        await veiculoStore.set(form.value as CadastroVeiculoType)
+
+        router.push({ path: `/informacao-veiculo/${token.token}` });
+        return
+    }
+
+    if (data.fipes?.length > 1) {
+        form.value.lista_veiculos_fipe = data.fipes
+
+        form.value.etapa_atual = 'selecionar-veiculo'
+
+        await veiculoStore.set(form.value as CadastroVeiculoType)
+
+        router.push({ path: `/selecionar-veiculo/${token.token}` })
+        return
+
+    }
+}
 
 async function onSubmit() {
     if (!isFormValid.value) {
@@ -31,28 +104,23 @@ async function onSubmit() {
         return
     }
 
+    const formVeiculo: VehicleRegistrationFormType = {
+        customer_name: form.value.nome_proprietario ?? '',
+        customer_phone: form.value.telefone_proprietario ?? '',
+        store_id: selectedStore.value?.id ?? 0,
+        vehicle: form.value.placa_ou_chassi ?? '',
+        type_vehicle: (form.value.placa_ou_chassi ?? '').length < 9 ? "PLATE" : "CHASSIS",
+    }
+
     isLoading.value = true
     loadingStore.show('Cadastrando veículo...')
 
     try {
-        if (!form.value.etapa_atual || form.value.etapa_atual === '') {
-            // cadastra nova (post)
-            await new Promise(resolve => setTimeout(resolve, 1000))
-        } else {
-            // alera existente (put)
-            await new Promise(resolve => setTimeout(resolve, 1000))
+        const response = await httpService.veiculo.create(formVeiculo)
+
+        if (response.isRight() && response.value?.data) {
+            await nextPage(response.value?.data)
         }
-        const token = router.currentRoute.value.params as { token?: string }
-        form.value.etapa_atual = 'informacao-veiculo'
-        form.value.id_loja_usuario = selectedStore.value?.id
-
-        await veiculoStore.set(form.value as CadastroVeiculoType)
-
-        // caso tenha mais de um veiculo
-        // form.value.etapa_atual = 'selecionar-veiculo'
-        // router.push({ path: `/selecionar-veiculo/${token}` })
-
-        router.push({ path: `/informacao-veiculo/${token.token}` });
 
     } catch (error) {
         console.error('Falha ao cadastrar veículo:', error)
@@ -78,8 +146,8 @@ async function fetchUserStores() {
         const response = await httpService.usuario.currentUser()
 
         if (response.isRight()) {
-            useUsuario().set(response.value?.data || {})
-            const userData = response.value?.data
+            useUsuario().set(response.value || {})
+            const userData = response.value
             lojasUsuario.value = userData?.user_stores ?? []
 
             if (!lojasUsuario.value.length) {
@@ -103,6 +171,7 @@ async function fetchUserStores() {
 onMounted(async () => {
     await fetchUserStores()
     const savedData = veiculoStore.get()
+
     form.value = { ...savedData }
 
     if (savedData.id_loja_usuario && lojasUsuario.value.length) {
@@ -133,8 +202,8 @@ onMounted(async () => {
 
             <v-col cols="12">
                 <v-text-field v-model="form.nome_proprietario" :readonly="isLoading" :loading="isLoading"
-                    :rules="[validators.required]" label="NOME DO PROPRIETÁRIO*" variant="outlined"
-                    prepend-inner-icon="mdi-account" />
+                    :rules="[validators.required, validators.minLength]" label="NOME DO PROPRIETÁRIO*"
+                    variant="outlined" prepend-inner-icon="mdi-account" :maxlength="50" />
             </v-col>
 
             <v-col cols="12">

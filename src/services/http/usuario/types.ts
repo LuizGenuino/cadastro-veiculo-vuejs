@@ -1,13 +1,13 @@
-export type UsuarioResponseType = {
-    isArray: boolean,
-    length: number,
-    path: string,
-    duration: string,
-    method: string,
-    data: UsuarioType,
-}
+// export type UsuarioResponseType = {
+//     isArray: boolean,
+//     length: number,
+//     path: string,
+//     duration: string,
+//     method: string,
+//     data: UsuarioType,
+// }
 
-export type UsuarioType = {
+export type UsuarioDataType = {
     user_name: string,
     isFinance: boolean,
     phone: string,

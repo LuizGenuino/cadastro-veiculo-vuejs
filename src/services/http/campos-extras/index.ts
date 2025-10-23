@@ -10,7 +10,7 @@ export class HttpCamposExtras extends HttpBase {
         super(url)
     }
 
-    protected resource = '/vehicles/extra-fields'
+    protected resource = '/p84/vehicles/extra-fields'
 
     async list(): Promise<Either<null, CamposExtrasResponseType>> {
         try {

@@ -8,5 +8,5 @@ const API_P84_URL = import.meta.env.VITE_P84_API || ''
 export const httpService = {
     usuario: new HttpUsuario(API_PITOM84_URL),
     camposExtras: new HttpCamposExtras(API_P84_URL),
-    //veiculo: new HttpCadastroVeiculo(API_PITOM84_URL)
+    veiculo: new HttpCadastroVeiculo(API_P84_URL)
 }

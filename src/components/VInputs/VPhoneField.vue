@@ -12,7 +12,7 @@ const props = defineProps({
 const rules = {
     required: (value: string) => !!value || 'O Campo é obrigatório',
     phone_rule: (value: string) => {
-        const regex = /^\(\d{2}\) \d?\d{4}-\d{4}$/
+        const regex = /\([1-9]\d\)\s9?\d{4}-\d{4}|\([1-9]\d\)\s9?\d{4}\d{4}|\([1-9]\d\)9?\d{4}-\d{4}|\([1-9]\d\)9?\d{4}\d{4}/
         return !value || regex.test(value) || 'Formato inválido. Verifique o número'
     }
 }
