@@ -57,9 +57,9 @@ async function nextPage(data: VeiculoDataType) {
 
 
     const token = router.currentRoute.value.params as { token?: string }
+    form.value.etapa_atual = 'informacao-veiculo'
 
     if (data.fipes === null) {
-        form.value.etapa_atual = 'informacao-veiculo'
 
         await veiculoStore.set(form.value as CadastroVeiculoType)
 
@@ -75,9 +75,6 @@ async function nextPage(data: VeiculoDataType) {
         form.value.marca = data.fipes[0].marca
         form.value.modelo = data.fipes[0].modelo
         form.value.valor_fipe = data.fipes[0].preco
-
-
-        form.value.etapa_atual = 'informacao-veiculo'
 
         await veiculoStore.set(form.value as CadastroVeiculoType)
 

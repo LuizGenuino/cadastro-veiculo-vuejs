@@ -1,6 +1,15 @@
 <script setup lang="ts">
+import { useLoading } from '@/stores/loading';
+import { useUsuario } from '@/stores/usuario';
+import { useVeiculo } from '@/stores/veiculo';
+import { swal } from '@/utils/swal';
 import { defineProps, defineModel, withDefaults } from 'vue'
+import { useRouter } from 'vue-router';
 
+const router = useRouter()
+const loadingStore = useLoading()
+const veiculoStore = useVeiculo()
+const usuarioStore = useUsuario()
 
 const props = withDefaults(defineProps<{
     loading?: boolean
@@ -21,13 +30,31 @@ const emit = defineEmits<{
     (e: 'onSubmit'): void
 }>()
 
+async function resetForm() {
+    try {
+        const result = await swal.confirm("Essa ação descartar todos os dados preenchidos! Voce tem certeza?", 'Reiniciar Cadastro?')
+        if (!result) {
+            return
+        }
+        loadingStore.show("Limpando dados do Formulario....")
+        await usuarioStore.clear()
+        await veiculoStore.clear()
+        const token = router.currentRoute.value.params as { token?: string }
+        router.replace({ path: `/${token.token}`, query: {} });
+    } catch (error) {
+        console.error(error);
+    } finally {
+        loadingStore.hidden()
+    }
 
+
+
+}
 
 </script>
 
 <template>
-    <v-card class="py-4 bg-background" :width="props.cardWidth"
-        :max-width="props.cardMaxWidth" :elevation="0">
+    <v-card class="py-4 bg-background" :width="props.cardWidth" :max-width="props.cardMaxWidth" :elevation="0">
         <v-form v-model="formVerification" @submit.prevent="emit('onSubmit')">
             <v-card-title class="page-header font-weight-bold text-center">
                 {{ props.cardTitle }}
@@ -39,11 +66,14 @@ const emit = defineEmits<{
                 <slot></slot>
             </v-card-text>
 
-            <v-card-actions class="justify-center">
+            <v-card-actions class="flex-column">
                 <slot name="actions">
                     <v-btn class="rounded-lg text-button px-4" elevation="4" size="large" color="primary" variant="flat"
                         :disabled="!formVerification" :loading="loading" type="submit">
                         {{ props.submitText }} </v-btn>
+                    <v-btn class="rounded-lg text-button px-4 mt-4" elevation="4" size="large" color="error"
+                        variant="flat" :loading="loading" @click="resetForm()">
+                        reiniciar cadastro </v-btn>
                 </slot>
             </v-card-actions>
         </v-form>

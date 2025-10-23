@@ -1,4 +1,5 @@
 // Utilities
+import { httpService } from '@/services/http'
 import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters'
 import type { CadastroVeiculoType } from '@/utils/types'
 import { defineStore } from 'pinia'
@@ -30,13 +31,14 @@ export const useVeiculo = defineStore('veiculo', () => {
 
     async function set(data: Partial<CadastroVeiculoType>) {
         state.value = { ...state.value, ...data }
-        
+
         const queryObj: Record<string, any> = transformDataToQueryParameters(state.value);
-        
+
         await router.replace({ query: queryObj });
     }
 
     async function clear() {
+        httpService.limparMemoriaCache()
         state.value = {}
         await router.replace({ query: {} });
     }

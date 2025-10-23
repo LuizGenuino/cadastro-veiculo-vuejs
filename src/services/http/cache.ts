@@ -13,4 +13,18 @@ export function getFromStorage<T>(key: string, maxAgeMs: number): T | null {
 
 export function saveToStorage<T>(key: string, data: T): void {
     localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+
+    let cacheMemoryKeys: Set<string>;
+    const cacheMemoryKeysString = JSON.parse(localStorage.getItem('p84@cacheMemoryKeys') || '[]');
+    cacheMemoryKeys = new Set<string>(cacheMemoryKeysString);
+    cacheMemoryKeys.add(key);
+    localStorage.setItem('p84@cacheMemoryKeys', JSON.stringify(Array.from(cacheMemoryKeys)));
+}
+
+export function clearCacheMemory() {
+    const cacheMemoryKeysString = JSON.parse(localStorage.getItem('p84@cacheMemoryKeys') || '[]');
+    cacheMemoryKeysString.forEach((key: string) => {
+        localStorage.removeItem(key)
+    });
+    localStorage.removeItem('p84@cacheMemoryKeys')
 }
