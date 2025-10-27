@@ -13,7 +13,7 @@ const props = defineProps<{
     <div v-if="form">
         <v-expansion-panels>
             <v-expansion-panel>
-                <v-expansion-panel-title class="text-subtitle-1 font-weight-bold">
+                <v-expansion-panel-title class="text-h6 font-weight-bold">
                     Informações do Cadastro
                 </v-expansion-panel-title>
                 <v-expansion-panel-text>
