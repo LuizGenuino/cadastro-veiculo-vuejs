@@ -101,13 +101,17 @@ onUnmounted(async () => {
 </script>
 
 <template>
-    <v-banner :max-width="700" v-if="!form.valor_fipe" bg-color="orange-darken-1" color="orange-darken-3" icon="mdi-alert" lines="one">
+    <v-banner class="mb-4" :max-width="700" v-if="!form.valor_fipe" bg-color="orange-darken-1" color="orange-darken-3"
+        icon="mdi-alert" lines="one">
         <template v-slot:text>
             <p class="text-orange-lighten-4 font-weight-medium">
                 Tabela FIPE não encontrada para essa placa
             </p>
         </template>
     </v-banner>
+
+    <registration-information :form="form" />
+
     <v-form-card v-model:formVerification="isBasicFormValid" :loading="isLoading" card-title="CADASTRO DE VEÍCULO"
         card-subtitle="Complete os dados adicionais" submit-text="Proximo" :is-submit-disabled="!isFormCompletelyValid"
         @submit.prevent="onSubmit">
@@ -115,7 +119,7 @@ onUnmounted(async () => {
         <v-row>
             <v-col cols="12">
                 <v-currency-field v-model:model="formState.valorDesejado" :readonly="isLoading" label="VALOR DESEJADO*"
-                    required prefix="R$" currency :hint="`${form.valor_fipe ? 'Valor Fipe:' + form.valor_fipe  : ''}`" />
+                    required prefix="R$" currency :hint="`${form.valor_fipe ? 'Valor Fipe:' + form.valor_fipe : ''}`" />
             </v-col>
 
             <v-col cols="12">

@@ -157,6 +157,7 @@ onUnmounted(() => {
 </script>
 
 <template>
+    <registration-information :form="form" />
     <v-form-card v-model:formVerification="formVerification" :loading="isLoading" card-title="CADASTRO DE VEÍCULO"
         card-subtitle="Adicione as fotos obrigatórias" submit-text="Próximo" @submit.prevent="onSubmit">
         <v-card-subtitle class="page-subtitle text-center mb-6">passo 3 de 4</v-card-subtitle>

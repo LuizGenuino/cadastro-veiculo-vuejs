@@ -60,12 +60,12 @@ async function onSubmit() {
 }
 
 onMounted(() => {
-    const savedData =  veiculoStore.get()
+    const savedData = veiculoStore.get()
     form.value = { ...savedData }
-    
+
     if (savedData.lista_veiculos_fipe && savedData.lista_veiculos_fipe.length > 1) {
         veiculosDisponiveis.value = savedData.lista_veiculos_fipe;
-        
+
     }
     if (form.value.id_veiculo_fipe && form.value.id_veiculo_fipe !== "") {
         veiculoSelecionado.value = veiculosDisponiveis.value.find(veiculo => form.value.id_veiculo_fipe === veiculo.id) || null
@@ -77,6 +77,7 @@ onMounted(() => {
 </script>
 
 <template>
+    <registration-information :form="form" />
     <v-form-card v-model:formVerification="isVersionSelected" :loading="isLoading" card-title="CADASTRO DE VEÍCULO"
         card-subtitle="Selecione a versão do veículo" submit-text="PRÓXIMO" @submit.prevent="onSubmit">
         <v-card-subtitle class="page-subtitle text-center mb-6">passo 1 de 4</v-card-subtitle>

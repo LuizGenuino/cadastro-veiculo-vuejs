@@ -11,6 +11,7 @@ declare module 'vue' {
     copy: typeof import('./components/VInputs/VCurrencyField.vue')['default']
     DynamicField: typeof import('./components/VDynamicForms/DynamicField.vue')['default']
     FieldGroup: typeof import('./components/VDynamicForms/FieldGroup.vue')['default']
+    RegistrationInformation: typeof import('./components/RegistrationInformation/RegistrationInformation.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     VChassiField: typeof import('./components/VInputs/VChassiField.vue')['default']
