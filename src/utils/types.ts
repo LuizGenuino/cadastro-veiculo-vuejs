@@ -43,10 +43,16 @@ export type CadastroVeiculoType = {
     kmRodado: number;
     estadoConservacao: string;
     motivoVenda: string;
-    campos_extras: Record<string, any>;
+    campos_extras: Record<string, CamposExtrasValueType>;
     fotos_obrigatorias: Partial<Record<requiredPhotosKey, PhotoData>>;
     fotos_opcionais: Partial<Record<optionalPhotosKey, PhotoData>>;
     lista_veiculos_fipe?: VeiculosFipeType[]
+}
+
+export type CamposExtrasValueType = {
+    id: number | null;
+    type: string | null;
+    valor: any | null;
 }
 
 export interface FormStateType {

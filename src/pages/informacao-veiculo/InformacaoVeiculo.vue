@@ -70,8 +70,6 @@ async function onSubmit() {
 
         await veiculoStore.set(form.value as CadastroVeiculoType);
 
-        loadingStore.hidden()
-
         router.push({ path: `/imagens-veiculo/${token.token}` });
 
     } catch (error) {

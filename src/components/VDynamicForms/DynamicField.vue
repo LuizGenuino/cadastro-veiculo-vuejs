@@ -1,15 +1,26 @@
 <script setup lang="ts">
-import { computed, defineProps, defineModel } from 'vue';
+import { computed, defineProps, defineModel, watch } from 'vue';
 import type { CamposExtrasType } from '@/services/http/campos-extras/types';
 import { VTextField, VSelect, VNumberInput } from 'vuetify/components';
+import type { CamposExtrasValueType } from '@/utils/types';
 
 
-const model = defineModel<unknown>('model');
+const model = defineModel<CamposExtrasValueType>('model', { required: true });
 
 const props = defineProps<{
     field: CamposExtrasType,
     isLoading: boolean
 }>();
+
+
+watchEffect(
+    () => {
+        if (model.value.id == null) {
+            model.value = { id: props.field.id, type: props.field.data_type, valor: null };
+        } else {
+            return
+        }
+    })
 
 const patternRegex = computed(() => {
     const pattern = props.field.validation.pattern;
@@ -92,20 +103,19 @@ const fieldComponent = computed(() => componentMap[props.field.data_type]);
     <v-card v-if="props.field.data_type === 'BOOLEAN'" variant="text">
         <p class="question-text mb-1 d-flex align-center">{{ props.field.field_label }}{{ props.field.is_required ? '*'
             : '' }}
-            <v-tooltip v-if="props.field.display.help_text" :text="props.field.display.help_text"
-                location="bottom">
+            <v-tooltip v-if="props.field.display.help_text" :text="props.field.display.help_text" location="bottom">
                 <template v-slot:activator="{ props }">
                     <div class="ml-2 border-md text-error  border-error  rounded-pill px-1" v-bind="props">?</div>
                 </template>
             </v-tooltip>
         </p>
-        <v-radio-group v-model="model" inline v-bind="{ ...commonProps, label: undefined }">
+        <v-radio-group v-model="model.valor" inline v-bind="{ ...commonProps, label: undefined }">
             <v-radio color="success" label="Sim" value="sim"></v-radio>
             <v-radio color="error" label="Não" value="não"></v-radio>
         </v-radio-group>
     </v-card>
 
-    <component v-else-if="fieldComponent" :is="fieldComponent" v-model="model"
+    <component v-else-if="fieldComponent" :is="fieldComponent" v-model="model.valor"
         v-bind="{ ...commonProps, ...specificProps }">
         <template #append-inner>
             <v-tooltip v-if="props.field.display.help_text" :text="props.field.display.help_text" location="bottom">
