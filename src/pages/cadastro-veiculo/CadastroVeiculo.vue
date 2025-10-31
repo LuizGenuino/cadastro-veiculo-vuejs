@@ -52,17 +52,11 @@ async function nextPage(data: VeiculoDataType) {
     form.value.id_loja_usuario = data.store_id
     form.value.nome_loja_usuario = data.store_name
     form.value.short_id = data.short_id
-    form.value.placa = data.plate
-    form.value.chassi = data.chassis
-
-
     const token = router.currentRoute.value.params as { token?: string }
     form.value.etapa_atual = 'informacao-veiculo'
 
     if (data.fipes === null) {
-
         await veiculoStore.set(form.value as CadastroVeiculoType)
-
         router.push({ path: `/informacao-veiculo/${token.token}` });
         return
     }
@@ -75,20 +69,17 @@ async function nextPage(data: VeiculoDataType) {
         form.value.marca = data.fipes[0].marca
         form.value.modelo = data.fipes[0].modelo
         form.value.valor_fipe = data.fipes[0].preco
-
+        form.value.placa = data.plate
+        form.value.chassi = data.chassis
         await veiculoStore.set(form.value as CadastroVeiculoType)
-
         router.push({ path: `/informacao-veiculo/${token.token}` });
         return
     }
 
     if (data.fipes?.length > 1) {
         form.value.lista_veiculos_fipe = data.fipes
-
         form.value.etapa_atual = 'selecionar-veiculo'
-
         await veiculoStore.set(form.value as CadastroVeiculoType)
-
         router.push({ path: `/selecionar-veiculo/${token.token}` })
         return
 
@@ -101,22 +92,22 @@ async function onSubmit() {
         return
     }
 
-    const formVeiculo: VehicleRegistrationFormType = {
-        customer_name: form.value.nome_proprietario ?? '',
-        customer_phone: form.value.telefone_proprietario ?? '',
-        store_id: selectedStore.value?.id ?? 0,
-        vehicle: form.value.placa_ou_chassi ?? '',
-        type_vehicle: (form.value.placa_ou_chassi ?? '').length < 9 ? "PLATE" : "CHASSIS",
-    }
-
-    isLoading.value = true
-    loadingStore.show('Cadastrando veículo...')
-
     try {
+        const formVeiculo: VehicleRegistrationFormType = {
+            customer_name: form.value.nome_proprietario ?? '',
+            customer_phone: form.value.telefone_proprietario ?? '',
+            store_id: selectedStore.value?.id ?? 0,
+            vehicle: form.value.placa_ou_chassi ?? '',
+            type_vehicle: (form.value.placa_ou_chassi ?? '').length < 9 ? "PLATE" : "CHASSIS",
+        }
+
+        isLoading.value = true
+        loadingStore.show('Cadastrando veículo...')
+
         const response = await httpService.veiculo.create(formVeiculo)
 
-        if (response.isRight() && response.value?.data) {
-            await nextPage(response.value?.data)
+        if (response.isRight() && response.value) {
+            await nextPage(response.value)
         }
 
     } catch (error) {

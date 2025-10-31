@@ -10,7 +10,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div v-if="form">
+    <div v-if="form?.id">
         <v-expansion-panels>
             <v-expansion-panel>
                 <v-expansion-panel-title class="text-h6 font-weight-bold">

@@ -20,6 +20,17 @@ export type requiredPhotosKey = keyof typeof FOTOS_OBRIGATORIAS;
 
 export type optionalPhotosKey = keyof typeof FOTOS_OPCIONAIS;
 
+export type CamposExtrasValueType = {
+    config_id: number | null;
+    type: string | null;
+    valor: any | null;
+}
+
+export interface PhotoData {
+    file: File;
+    url: string;
+}
+
 
 export type CadastroVeiculoType = {
     etapa_atual: string | null;
@@ -49,11 +60,7 @@ export type CadastroVeiculoType = {
     lista_veiculos_fipe?: VeiculosFipeType[]
 }
 
-export type CamposExtrasValueType = {
-    id: number | null;
-    type: string | null;
-    valor: any | null;
-}
+
 
 export interface FormStateType {
     valorDesejado: string;
@@ -62,7 +69,3 @@ export interface FormStateType {
     motivoVenda: string;
 }
 
-export interface PhotoData {
-    file: File;
-    url: string;
-}

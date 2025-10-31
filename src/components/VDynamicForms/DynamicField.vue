@@ -15,8 +15,8 @@ const props = defineProps<{
 
 watchEffect(
     () => {
-        if (model.value.id == null) {
-            model.value = { id: props.field.id, type: props.field.data_type, valor: null };
+        if (model.value.config_id == null) {
+            model.value = { config_id: props.field.id, type: props.field.data_type, valor: null };
         } else {
             return
         }

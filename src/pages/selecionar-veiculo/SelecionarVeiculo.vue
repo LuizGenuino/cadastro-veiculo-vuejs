@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { VeiculosFipeType } from '@/services/http/cadastro-veiculo/types';
+import { httpService } from '@/services/http';
+import type { VehicleFipeSelectionFormType, VeiculoDataType, VeiculosFipeType } from '@/services/http/cadastro-veiculo/types';
 import { useLoading } from '@/stores/loading';
 import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
@@ -15,11 +16,40 @@ const veiculosDisponiveis = ref<VeiculosFipeType[]>([]);
 
 const form = ref<Partial<CadastroVeiculoType>>({});
 
+
+
 const veiculoSelecionado = ref<VeiculosFipeType | null>(null);
 const isLoading = ref(false);
 
 
 const isVersionSelected = computed(() => !!veiculoSelecionado.value);
+
+const precoFormatado = computed<number>(() => {
+    if (veiculoSelecionado.value?.preco && veiculoSelecionado.value.preco !== '' && typeof veiculoSelecionado.value.preco === 'string') {
+        const newValue = veiculoSelecionado.value.preco.replace(/\D/g, '').replace(/(\d)(\d{2})$/, '$1,$2');
+        return parseFloat(newValue);
+    }
+    return 0;
+});
+
+async function nextPage(data: VeiculoDataType) {
+    const token = router.currentRoute.value.params as { token?: string }
+    form.value.etapa_atual = 'informacao-veiculo'
+    form.value.id_veiculo_fipe = veiculoSelecionado.value?.id
+    form.value.codigo_fipe = data.fipe_code
+    form.value.ano_fabricacao = data.year_manufacture.toString()
+    form.value.ano_modelo = data.year_model.toString()
+    form.value.marca = data.vehicle_brand
+    form.value.modelo = data.vehicle_model
+    form.value.valor_fipe = veiculoSelecionado.value?.preco
+    form.value.placa = data.plate
+    form.value.chassi = data.chassis
+
+    await veiculoStore.set(form.value as CadastroVeiculoType)
+
+    router.push({ path: `/informacao-veiculo/${token.token}` });
+    return
+}
 
 async function onSubmit() {
     if (!isVersionSelected.value || !veiculoSelecionado.value) {
@@ -30,25 +60,20 @@ async function onSubmit() {
     isLoading.value = true;
     try {
         loadingStore.show("Salvando Escolha....")
-        form.value.id_veiculo_fipe = veiculoSelecionado.value.id
-        form.value.codigo_fipe = veiculoSelecionado.value.fipe_codigo
-        form.value.ano_fabricacao = veiculoSelecionado.value.ano
-        form.value.ano_modelo = veiculoSelecionado.value.ano_modelo
-        form.value.marca = veiculoSelecionado.value.marca
-        form.value.modelo = veiculoSelecionado.value.modelo
-        form.value.valor_fipe = veiculoSelecionado.value.preco
 
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        const formVeiculo: VehicleFipeSelectionFormType = {
+            id: form.value.id ?? 0,
+            fipe_code: veiculoSelecionado.value.fipe_codigo,
+            fipe_value: precoFormatado.value,
+            year_manufacture: Number(veiculoSelecionado.value.ano),
+            year_model: Number(veiculoSelecionado.value.ano_modelo),
+        }
 
-        const token = router.currentRoute.value.params as { token?: string }
+        const response = await httpService.veiculo.selectVehicle(formVeiculo);
 
-        form.value.etapa_atual = 'informacao-veiculo';
-
-        await veiculoStore.set(form.value as CadastroVeiculoType)
-
-        loadingStore.hidden()
-
-        router.push({ path: `/informacao-veiculo/${token.token}` });
+        if (response.isRight() && response.value) {
+            await nextPage(response.value)
+        }
 
     } catch (error) {
         console.error("Erro ao selecionar a versão:", error);

@@ -1,3 +1,5 @@
+import type { CamposExtrasValueType } from "@/utils/types"
+
 export type VehicleRegistrationFormType = {
     customer_name: string,
     customer_phone: string,
@@ -6,13 +8,21 @@ export type VehicleRegistrationFormType = {
     type_vehicle: string,
 }
 
-export type VeiculoResponseType = {
-    isArray: boolean,
-    length: number,
-    path: string,
-    duration: string,
-    method: string,
-    data: VeiculoDataType,
+export type VehicleFipeSelectionFormType = {
+    id: number,
+    year_model: number,
+    year_manufacture: number,
+    fipe_code: string,
+    fipe_value: number
+}
+
+export type AdditionalInformationFormType = {
+    vehicle_id: number,
+    desired_value: number,
+    mileage: number,
+    conservation_state: string,
+    sale_reason: string,
+    extra_fields: Record<string, CamposExtrasValueType>
 }
 
 export type VeiculoDataType = {
@@ -64,4 +74,30 @@ export type VeiculosFipeType = {
     preco: string,
     ano_modelo: string,
     updated_at: string
+}
+
+
+export type AdditionalInformationDataType = {
+    vehicle_id: number,
+    desired_value: number,
+    mileage: number,
+    conservation_state: string,
+    sale_reason: string,
+    extra_fields: ExtraFieldsData[]
+}
+
+
+export type ExtraFieldsData = {
+    id: number,
+    vehicle_id: number,
+    config_id: number,
+    text_value: string,
+    numeric_value: number,
+    boolean_value: true,
+    date_value: string,
+    time_value: string,
+    json_value: any,
+    created_at: string,
+    updated_at: string,
+    updated_by: number
 }
