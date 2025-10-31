@@ -134,6 +134,7 @@ async function fetchUserStores() {
         const response = await httpService.usuario.currentUser()
 
         if (response.isRight()) {
+
             useUsuario().set(response.value || {})
             const userData = response.value
             lojasUsuario.value = userData?.user_stores ?? []

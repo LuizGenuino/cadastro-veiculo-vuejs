@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { httpService } from '@/services/http';
-import type { AdditionalInformationFormType } from '@/services/http/cadastro-veiculo/types';
+import type { AdditionalInformationDataType, AdditionalInformationFormType } from '@/services/http/cadastro-veiculo/types';
 import { useLoading } from '@/stores/loading';
 import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
 import { type CadastroVeiculoType, type CamposExtrasValueType, type FormStateType } from '@/utils/types';
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { da } from 'vuetify/locale';
 
 
 const ESTADOS_CONSERVACAO = [
@@ -50,17 +51,33 @@ const isFormCompletelyValid = computed(() => {
 function ExtraFieldWithOutNullValue(extraFields: Record<string, any>): Record<string, CamposExtrasValueType> {
     return Object.fromEntries(
         Object.entries(extraFields)
-            .filter(([_, value]) => (value as any)?.valor !== null && (value as any)?.valor !== '')
+            .filter(([_, value]) => value?.valor !== null && value?.valor !== '')
             .map(([key, value]) => {
-                const v = value as any;
-                if (v?.valor === 'sim') {
-                    v.valor = true;
-                } else if (v?.valor === 'não' || v?.valor === 'nao') {
-                    v.valor = false;
-                }
-                return [key, value] as const;
+                // cria uma cópia independente do objeto
+                const v = { ...value };
+
+                if (v.valor === 'sim') v.valor = true;
+                else if (v.valor === 'não' || v.valor === 'nao') v.valor = false;
+
+                return [key, v] as const;
             })
     ) as Record<string, CamposExtrasValueType>;
+}
+
+async function nextPage(data: AdditionalInformationDataType) {
+    const token = router.currentRoute.value.params as { token?: string }
+
+    form.value.valorDesejado = data.desired_value;
+    form.value.kmRodado = data.mileage;
+    form.value.estadoConservacao = data.conservation_state;
+    form.value.motivoVenda = data.sale_reason;
+    form.value.etapa_atual = 'imagens-veiculo';
+
+    await veiculoStore.set(form.value as CadastroVeiculoType);
+
+    router.push({ path: `/imagens-veiculo/${token.token}` });
+
+    return
 }
 
 async function onSubmit() {
@@ -73,7 +90,7 @@ async function onSubmit() {
     try {
         isLoading.value = true
         loadingStore.show("Salvando Informações Extras...")
-        console.log("segundo: ", form.value);
+
         const formVeiculo: AdditionalInformationFormType = {
             vehicle_id: Number(form.value.id) || 0,
             desired_value: Number(formState.valorDesejado.replace('.', '').replace(',', '.')) || 0,
@@ -83,31 +100,11 @@ async function onSubmit() {
             extra_fields: ExtraFieldWithOutNullValue(form.value.campos_extras || {}),
         }
 
-        console.log("segundo: ", form.value);
-
-
         const response = await httpService.veiculo.insertAdditionalInformation(formVeiculo);
 
         if (response.isRight() && response.value) {
-            // await nextPage(response.value)
-            console.log(response.value);
-
+            await nextPage(response.value)
         }
-
-        // form.value.valorDesejado = Number(formState.valorDesejado.replace('.', '')) || 0;
-        // form.value.kmRodado = Number(formState.kmRodado.replace('.', '')) || 0;
-        // form.value.estadoConservacao = formState.estadoConservacao;
-        // form.value.motivoVenda = formState.motivoVenda;
-
-        // await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // const token = router.currentRoute.value.params as { token?: string }
-
-        // form.value.etapa_atual = 'imagens-veiculo';
-
-        // await veiculoStore.set(form.value as CadastroVeiculoType);
-
-        // router.push({ path: `/imagens-veiculo/${token.token}` });
 
     } catch (error) {
         console.error("Erro ao salvar informações:", error);

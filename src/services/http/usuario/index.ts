@@ -14,11 +14,8 @@ export class HttpUsuario extends HttpBase {
 
     async currentUser(): Promise<Either<null, UsuarioDataType>> {
         try {
-            const response = await fetchWithCache<any>(
-                this.http,
-                this.resource,
-            );
-            return Right.create(response.data)
+            const response = await this.http.get(`${this.resource} `)
+            return Right.create(response.data.data)
         } catch {
             return Left.create(null)
         }

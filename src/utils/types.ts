@@ -22,7 +22,6 @@ export type optionalPhotosKey = keyof typeof FOTOS_OPCIONAIS;
 
 export type CamposExtrasValueType = {
     config_id: number | null;
-    type: string | null;
     valor: any | null;
 }
 

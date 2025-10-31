@@ -45,7 +45,7 @@ watchEffect(() => {
     const currentExtras = model.value.campos_extras;
     camposDadosExtras.value.forEach(field => {
         if (!(field.field_key in currentExtras)) {
-            currentExtras[field.field_key] = { config_id: null, type: null, valor: null};
+            currentExtras[field.field_key] = { config_id: null, valor: null};
         }
     });
 });
