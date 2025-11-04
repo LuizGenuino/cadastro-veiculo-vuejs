@@ -19,7 +19,7 @@ function onClick() {
                 <v-btn color="bg-component" :icon="theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'" @click="onClick"></v-btn>
             </div>
 
-            <v-main>
+            <v-main id="main-component">
                 <v-container class="d-flex flex-column align-center justify-center h-100">
                     <router-view></router-view>
                 </v-container>

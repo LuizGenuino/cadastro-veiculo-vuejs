@@ -118,7 +118,7 @@ const onSubmit = async () => {
         useLoading().show("Enviando Fotos Obrigatorias...")
         isLoading.value = true;
         await new Promise(resolve => setTimeout(resolve, 1500));
-        const token = '123';
+        const token = router.currentRoute.value.params as { token?: string }
 
         // form.value.fotos_obrigatorias = { ...fotos.value };
         form.value.etapa_atual = 'imagens-opcionais';
@@ -127,7 +127,7 @@ const onSubmit = async () => {
 
         useLoading().hidden()
 
-        router.push({ path: `/imagens-opcionais/${token}` });
+        router.push({ path: `/imagens-opcionais/${token.token}` });
     } catch (error) {
         console.error('Falha ao buscar veículo:', error);
         toast('Não foi possível encontrar o veículo. Tente novamente.', 'error');

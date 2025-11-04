@@ -6,21 +6,17 @@ const router = useRouter();
 const isModalVisible = defineModel<boolean>('isModalVisible', { default: false });
 
 function visualizarVeiculo() {
-    const token = '123';
-
-    router.push({ path: `/${token}` });
+    window.open('https://app.pitom.com.br/avaliacoes', '_parent');
 }
 
 function cadastrarNovo() {
-    const token = '123';
+    const token = router.currentRoute.value.params as { token?: string }
 
-    router.push({ path: `/${token}` });
+    router.replace({ path: `/${token.token}` });
 }
 
 function fechar() {
-    const token = '123';
-
-    router.push({ path: `/${token}` });
+    window.open('https://app.pitom.com.br/avaliacoes', '_parent');
 }
 
 
