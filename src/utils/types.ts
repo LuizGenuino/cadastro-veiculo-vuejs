@@ -26,10 +26,20 @@ export type CamposExtrasValueType = {
 }
 
 export interface PhotoData {
-    file: File;
+    file: File | null;
     url: string;
 }
 
+export type PhotoInfo = {
+    id: number;
+    key: requiredPhotosKey | optionalPhotosKey;
+    descricao: string;
+    image_url: string;
+    is_primary: boolean;
+    is_doc: boolean;
+    thumbnails: boolean;
+    display_order: number;
+}
 
 export type CadastroVeiculoType = {
     etapa_atual: string | null;
@@ -54,8 +64,8 @@ export type CadastroVeiculoType = {
     estadoConservacao: string;
     motivoVenda: string;
     campos_extras: Record<string, CamposExtrasValueType>;
-    fotos_obrigatorias: Partial<Record<requiredPhotosKey, PhotoData>>;
-    fotos_opcionais: Partial<Record<optionalPhotosKey, PhotoData>>;
+    fotos_obrigatorias: PhotoInfo[];
+    fotos_opcionais: PhotoInfo[];
     lista_veiculos_fipe?: VeiculosFipeType[]
 }
 

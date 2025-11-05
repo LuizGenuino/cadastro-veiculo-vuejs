@@ -37,6 +37,4 @@ export class HttpCadastroVeiculo extends HttpBase {
             return Left.create(null)
         }
     }
-
-
 }

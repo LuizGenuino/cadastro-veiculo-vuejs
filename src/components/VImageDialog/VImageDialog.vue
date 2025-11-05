@@ -2,7 +2,7 @@
 import { ref, defineProps, defineModel, watch } from 'vue'
 
 interface PhotoData {
-    file: File;
+    file: File | null;
     url: string;
 }
 
@@ -36,15 +36,12 @@ function updateRotation(rotate: number) {
 
 
 async function applyAndSaveRotation() {
-    if (!props.selectedPhotoKey || !props.foto?.file.type) {
+
+    if (!props.selectedPhotoKey || !props.foto?.file?.type) {
         isModalVisible.value = false;
 
         return;
     }
-
-    console.log(props.foto?.file.type);
-    console.log(props.foto?.file);
-
 
     if (rotateLevel.value % 360 === 0 && props.foto?.file.type === "image/webp") {
         isModalVisible.value = false;
@@ -54,13 +51,13 @@ async function applyAndSaveRotation() {
     isLoading.value = true;
     const photoData = props.foto;
 
-    if (!photoData) {
+    if (!photoData || !photoData.file) {
         isLoading.value = false;
         return;
     }
 
     try {
-        const rotatedFile = await rotateImage(photoData.file, rotateLevel.value);
+        const rotatedFile = await rotateImage(photoData.file, props.selectedPhotoKey, rotateLevel.value);
 
         const newPhotoData: PhotoData = {
             file: rotatedFile,
@@ -83,7 +80,8 @@ async function applyAndSaveRotation() {
     }
 }
 
-function rotateImage(file: File, degrees: number): Promise<File> {
+function rotateImage(file: File, name: string, degrees: number): Promise<File> {
+
     return new Promise((resolve, reject) => {
         const image = new Image();
         image.src = URL.createObjectURL(file);
@@ -105,7 +103,7 @@ function rotateImage(file: File, degrees: number): Promise<File> {
             ctx.translate(canvas.width / 2, canvas.height / 2);
             ctx.rotate(radians);
 
-            if (file.type === 'image/jpeg') {
+            if (file.type !== 'image/webp') {
                 ctx.fillStyle = 'white';
                 ctx.fillRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
             }
@@ -117,7 +115,7 @@ function rotateImage(file: File, degrees: number): Promise<File> {
                     return reject(new Error('Erro ao converter canvas para Blob.'));
                 }
 
-                const newFileName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
+                const newFileName = name + ".webp";
                 const newFile = new File([blob], newFileName, { type: 'image/webp' });
 
                 resolve(newFile);
@@ -144,6 +142,7 @@ watch(isModalVisible, (newValue) => {
 </script>
 
 <template>
+
     <v-dialog v-model="isModalVisible" width="95vw" max-width="1100" max-height="95vh" class="pa-1" persistent>
         <v-card v-if="props.selectedPhotoKey && foto">
             <v-card-title class="d-flex justify-space-between align-center">
@@ -167,6 +166,7 @@ watch(isModalVisible, (newValue) => {
                     <v-btn class="mx-2" icon="mdi-magnify-minus" @click="updateZoom(-0.2)" :disabled="zoomLevel <= 1" />
                     <v-btn class="mx-2" icon="mdi-magnify-plus" @click="updateZoom(0.2)" :disabled="zoomLevel >= 3" />
                 </v-btn-toggle>
+
                 <div class="w-100 d-flex justify-space-between align-center">
                     <v-btn variant="flat" prepend-icon="mdi-delete" color="error" text="Remover"
                         @click.stop="removePhoto(props.selectedPhotoKey), isModalVisible = false"

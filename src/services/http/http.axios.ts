@@ -3,18 +3,18 @@ import axios, { AxiosError } from "axios";
 import { handlerErrorRequest } from "../middlewares/errorHandler";
 
 class AxiosInstance {
-    public initialize(url: string) {
+    public initialize(url: string, isFormData: boolean = false) {
         const axiosInstance = axios.create({
             baseURL: url,
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': isFormData ? 'multipart/form-data' : 'application/json',
             },
             timeout: 15000, //
         })
 
         axiosInstance.interceptors.request.use(async (config) => {
             const userToken = this.getToken()
-            if (!userToken) {
+            if (!userToken) { 
                 return config
             }
             config.headers['Authorization'] = `Bearer ${userToken}`
