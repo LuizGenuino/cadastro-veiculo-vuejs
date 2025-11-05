@@ -1,37 +1,41 @@
 <script setup lang="ts">
 import { toast } from '@/utils/swal/toast';
-import { FOTOS_OBRIGATORIAS, type CadastroVeiculoType, type PhotoData, type PhotoInfo, type requiredPhotosKey } from '@/utils/types';
+import { type PhotoData } from '@/utils/types';
 import { ref, computed, watch, defineModel } from 'vue'
 
+type objetoFotosType = {
+    titulo: string;
+    icon: string;
+    class?: string;
+}
 
+const fotos = defineModel<Record<string, PhotoData>>('fotos', { default: {} });
 
-const draggingKey = ref<requiredPhotosKey | null>(null)
+const formVerification = defineModel<boolean>('formVerification', { default: false });
+
+const props = defineProps<{
+    objetoFotos: Record<string, objetoFotosType>;
+}>()
+
+const draggingKey = ref<string | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null);
-const fotos = ref<Partial<Record<requiredPhotosKey, PhotoData>>>({});
 
-
-const uploading = ref<Partial<Record<requiredPhotosKey, boolean>>>({});
-const uploadProgress = ref<Partial<Record<requiredPhotosKey, number>>>({});
+const uploading = ref<Partial<Record<string, boolean>>>({});
+const uploadProgress = ref<Partial<Record<string, number>>>({});
 
 
 const isModalVisible = ref<boolean>(false);
-const selectedPhotoKey = ref<requiredPhotosKey | null>(null);
+const selectedPhotoKey = ref<string | null>(null);
 
-
-const isLoading = ref<boolean>(false);
 const isUploading = ref<boolean>(false);
 
 
 
-const formVerification = defineModel<boolean>('formVerification', { default: false });
-
-
-
-const totalFotosObrigatorias = computed(() => Object.keys(FOTOS_OBRIGATORIAS).length);
+const totalFotos = computed(() => Object.keys(props.objetoFotos).length);
 const fotosEnviadasCount = computed(() => Object.keys(fotos.value).length);
 
 const todasFotosEnviadas = computed(() => {
-    return fotosEnviadasCount.value === totalFotosObrigatorias.value;
+    return fotosEnviadasCount.value === totalFotos.value;
 });
 
 
@@ -40,22 +44,16 @@ watch(todasFotosEnviadas, (newValue) => {
 });
 
 
-const triggerFileInput = (key: requiredPhotosKey) => {
+const triggerFileInput = (key: string) => {
 
     fileInputRef.value?.setAttribute('data-photo-key', key);
     fileInputRef.value?.click();
 }
 
-function handlePhotoUpdate(key: requiredPhotosKey, newPhotoData: PhotoData) {
-    if (fotos.value[key]) {
-        fotos.value[key] = newPhotoData;
-    }
-}
-
 const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
-    const key = target.getAttribute('data-photo-key') as requiredPhotosKey | null;
+    const key = target.getAttribute('data-photo-key') as string | null;
 
     if (!file || !key) return;
 
@@ -98,7 +96,7 @@ const handleFileSelect = async (event: Event) => {
     }
 }
 
-const handleFileDrop = async (event: DragEvent, key: requiredPhotosKey) => {
+const handleFileDrop = async (event: DragEvent, key: string) => {
     event.preventDefault()
     draggingKey.value = null
 
@@ -112,7 +110,7 @@ const handleFileDrop = async (event: DragEvent, key: requiredPhotosKey) => {
     handleFileSelect(evt)
 }
 
-const handleDragOver = (event: DragEvent, key: requiredPhotosKey) => {
+const handleDragOver = (event: DragEvent, key: string) => {
     event.preventDefault()
     draggingKey.value = key
 }
@@ -122,7 +120,7 @@ const handleDragLeave = () => {
 }
 
 
-const removePhoto = (key: requiredPhotosKey) => {
+const removePhoto = (key: string) => {
     const photo = fotos.value[key];
     if (photo?.file && photo.url) {
         URL.revokeObjectURL(photo.url);
@@ -130,8 +128,14 @@ const removePhoto = (key: requiredPhotosKey) => {
     }
 }
 
+function handlePhotoUpdate(key: string, newPhotoData: PhotoData) {
+    if (fotos.value[key]) {
+        fotos.value[key] = newPhotoData;
+    }
+}
 
-const openPhotoModal = (key: requiredPhotosKey) => {
+
+const openPhotoModal = (key: string) => {
     selectedPhotoKey.value = key;
     isModalVisible.value = true;
 }
@@ -142,7 +146,7 @@ const openPhotoModal = (key: requiredPhotosKey) => {
 <template>
     <div>
         <v-row>
-            <v-col v-for="(fotoInfo, key) in FOTOS_OBRIGATORIAS" :key="key" cols="6">
+            <v-col v-for="(fotoInfo, key) in props.objetoFotos" :key="key" cols="6">
                 <v-card class="photo-upload-card" elevation="0" :variant="fotos[key] ? 'tonal' : 'tonal'"
                     @dragover.prevent="handleDragOver($event, key)" @dragleave="handleDragLeave"
                     @drop="handleFileDrop($event, key)" :class="{ 'dragging': draggingKey === key }">
@@ -175,12 +179,15 @@ const openPhotoModal = (key: requiredPhotosKey) => {
         </v-row>
 
         <p class="text-medium-emphasis text-body-2 mb-4">
-            Progresso: {{ Object.keys(fotos).length }} de {{ Object.keys(FOTOS_OBRIGATORIAS).length }} fotos enviadas.
+            Progresso: {{ Object.keys(fotos).length }} de {{ Object.keys(props.objetoFotos).length }} fotos enviadas.
         </p>
 
         <input ref="fileInputRef" type="file" accept=".jpg, .jpeg, .png, .gif, .bmp, .tiff, .heic, .webp, .svg"
             capture="environment" style="display: none" @change="handleFileSelect" />
     </div>
+    <v-image-dialog v-if="selectedPhotoKey" :foto="fotos[selectedPhotoKey]" v-model:isModalVisible="isModalVisible"
+        :selectedPhotoKey="selectedPhotoKey" :removePhoto="removePhoto"
+        :titulo="props.objetoFotos[selectedPhotoKey].titulo" @update:photo="handlePhotoUpdate" />
 </template>
 
 <style scoped>
