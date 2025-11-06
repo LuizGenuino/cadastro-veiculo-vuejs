@@ -52,7 +52,6 @@ function ExtraFieldWithOutNullValue(extraFields: Record<string, any>): Record<st
         Object.entries(extraFields)
             .filter(([_, value]) => value?.valor !== null && value?.valor !== '')
             .map(([key, value]) => {
-                // cria uma cópia independente do objeto
                 const v = { ...value };
 
                 if (v.valor === 'sim') v.valor = true;

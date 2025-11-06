@@ -32,60 +32,75 @@ watch(todasFotosEnviadas, (newValue) => {
     formVerification.value = newValue;
 });
 
-const onSubmit = async () => {
+
+async function nextPage() {
+    toast('Imagens cadastradas com sucesso!', 'success');
+    await useVeiculo().set(form.value as CadastroVeiculoType);
+    const { token } = router.currentRoute.value.params as { token?: string };
+    if (token) {
+        router.push({ path: `/imagens-opcionais/${token}` });
+    }
+}
+
+function validaImagem(arrayFotos: Array<[chavesFotosObrigatoriaType, ObjetoFotoType | undefined]>): "valid" | "alreadyUploaded" | "invalid" {
+
+    if (!todasFotosEnviadas.value) {
+        toast('Por favor, adicione todas as fotos obrigatórias.', 'warning');
+        return "invalid";
+    }
+
+    const todasComUrl = arrayFotos.every(([_, photo]) => !photo?.file && photo?.url);
+    if (todasComUrl) {
+        return "alreadyUploaded";
+    }
+
+    const faltandoFoto = arrayFotos.some(([_, photo]) => !photo?.file && !photo?.url);
+    if (faltandoFoto) {
+        toast('Falha no upload - tente novamente.', 'error');
+        return "invalid";
+    }
+
+    return "valid";
+}
+
+async function onSubmit() {
     try {
-        if (!todasFotosEnviadas.value) {
-            toast('Por favor, adicione todas as fotos obrigatórias.', 'warning');
-            return;
-        }
-
         const arrayFotos = Object.entries(fotos.value) as Array<[chavesFotosObrigatoriaType, ObjetoFotoType | undefined]>;
+        const validacao = validaImagem(arrayFotos);
 
-        const verifyPhoto = arrayFotos.some(([key, photo]) => {
-            return !photo?.file && photo?.url;
-        });
+        if (validacao === "invalid") return;
 
-        if (verifyPhoto) {
-            const token = router.currentRoute.value.params as { token?: string }
-            router.push({ path: `/imagens-opcionais/${token.token}` });
+        if (validacao === "alreadyUploaded") {
+            nextPage();
             return;
         }
 
-
-        const verifyType = arrayFotos.some(([key, photo]) => {
-            return !photo?.file || photo.file.type.indexOf('image/webp') === -1;
-        });
-
-        if (verifyType) {
-            toast('Falha no upload - tente novamente', 'error');
-            return;
-        }
-
-        useLoading().show("Enviando Fotos Obrigatorias...")
+        useLoading().show("Enviando Fotos Obrigatórias...");
         isLoading.value = true;
 
         let ordem = 0;
-        let fotosEnviadas: InfoFotosType[] = [];
-        for (const [key, photo] of arrayFotos) {
-            if (photo?.file) {
 
-                ordem++;
-                const isDocs = key.includes('documento');
-                const formData = new FormData();
-                formData.append('ordem', ordem.toString());
-                formData.append('is_doc', isDocs.toString());
-                formData.append('thumbnails', (!isDocs).toString());
-                formData.append('vehicle_id', form.value.id?.toString() || '');
-                formData.append('arquivo', photo.file);
+        const promises = arrayFotos.map(async ([key, photo]) => {
+            if (!photo?.file) return null;
 
+            ordem++;
+            const isDocs = key.includes('documento');
+            const formData = new FormData();
+            formData.append('ordem', ordem.toString());
+            formData.append('is_doc', isDocs.toString());
+            formData.append('thumbnails', (!isDocs).toString());
+            formData.append('vehicle_id', form.value.id?.toString() || '');
+            formData.append('arquivo', photo.file);
+
+            try {
                 const response = await httpService.midia.salvarImagem(formData);
 
                 if (response.isRight() && response.value) {
                     fotos.value[key] = {
                         file: null,
                         url: response.value.image_url
-                    }
-                    fotosEnviadas.push({
+                    };
+                    return {
                         id: response.value.id,
                         key: key as chavesFotosObrigatoriaType,
                         descricao: response.value.descricao,
@@ -94,31 +109,44 @@ const onSubmit = async () => {
                         is_doc: response.value.is_doc,
                         thumbnails: response.value.thumbnails,
                         display_order: response.value.display_order,
-                    });
+                    };
+                } else {
+                    fotos.value[key] = undefined;
+                    throw new Error("Falha ao enviar imagem");
                 }
+            } catch (err) {
+                console.error(`Erro ao enviar ${key}:`, err);
+                toast(`Erro ao enviar ${key.replace(/_/g, ' ')}.`, 'error');
+                return null;
             }
-        }
+        });
+
+        const results = await Promise.allSettled(promises);
+
+        const fotosEnviadas = results
+            .filter(r => r.status === "fulfilled" && r.value)
+            .map(r => (r as PromiseFulfilledResult<InfoFotosType>).value);
 
         form.value.fotos_obrigatorias = fotosEnviadas;
 
-
+        if (fotosEnviadas.length < arrayFotos.length) {
+            toast("Algumas imagens não foram enviadas. Verifique e tente novamente.", "warning");
+            return;
+        }
 
         form.value.etapa_atual = 'imagens-opcionais';
 
-        await useVeiculo().set(form.value as CadastroVeiculoType);
+        await nextPage();
 
-        useLoading().hidden()
-        toast('Imagens Cadastrada com Sucesso!', 'success');
-        const token = router.currentRoute.value.params as { token?: string }
-        router.push({ path: `/imagens-opcionais/${token.token}` });
     } catch (error) {
-        console.error('Falha ao buscar veículo:', error);
-        toast('Não foi possível encontrar o veículo. Tente novamente.', 'error');
+        console.error('Erro geral no envio:', error);
+        toast('Não foi possível enviar as imagens. Tente novamente.', 'error');
     } finally {
-        useLoading().hidden()
+        useLoading().hidden();
         isLoading.value = false;
     }
 }
+
 
 onMounted(() => {
     const data: Partial<CadastroVeiculoType> = useVeiculo().get();

@@ -16,11 +16,8 @@ const veiculosDisponiveis = ref<VeiculosFipeType[]>([]);
 
 const form = ref<Partial<CadastroVeiculoType>>({});
 
-
-
 const veiculoSelecionado = ref<VeiculosFipeType | null>(null);
 const isLoading = ref(false);
-
 
 const isVersionSelected = computed(() => !!veiculoSelecionado.value);
 
@@ -95,7 +92,6 @@ onMounted(() => {
     if (form.value.id_veiculo_fipe && form.value.id_veiculo_fipe !== "") {
         veiculoSelecionado.value = veiculosDisponiveis.value.find(veiculo => form.value.id_veiculo_fipe === veiculo.id) || null
     }
-
 
 })
 
