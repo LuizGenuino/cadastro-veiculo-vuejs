@@ -1,17 +1,14 @@
 <script setup lang="ts">
+import type { ObjetoFotoType } from '@/stores/types';
 import { ref, defineProps, defineModel, watch } from 'vue'
 
-interface PhotoData {
-    file: File | null;
-    url: string;
-}
 
 const isModalVisible = defineModel<boolean>('isModalVisible', { default: false });
 
 const props = defineProps<{
     titulo: string;
     selectedPhotoKey: string | null;
-    foto: PhotoData | undefined;
+    foto: ObjetoFotoType | undefined;
     removePhoto: (key: any | null) => void;
 }>()
 
@@ -59,7 +56,7 @@ async function applyAndSaveRotation() {
     try {
         const rotatedFile = await rotateImage(photoData.file, props.selectedPhotoKey, rotateLevel.value);
 
-        const newPhotoData: PhotoData = {
+        const newPhotoData: ObjetoFotoType = {
             file: rotatedFile,
             url: URL.createObjectURL(rotatedFile)
         };

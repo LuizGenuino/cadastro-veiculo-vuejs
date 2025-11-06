@@ -2,7 +2,7 @@ import { Right } from "@/utils/either/right";
 import { HttpBase } from "../http.base";
 import { Left } from "@/utils/either/left";
 import type { Either } from "@/utils/either";
-import type { ImagensVeiculoDataType } from "./types";
+import type { ResponseImagensVeiculoType } from "./types";
 
 export class HttpUploadImage extends HttpBase {
     constructor(url: string) {
@@ -11,7 +11,7 @@ export class HttpUploadImage extends HttpBase {
 
     protected resource = '/p84/upload'
 
-    async upload(image: FormData): Promise<Either<null, ImagensVeiculoDataType>> {
+    async salvarImagem(image: FormData): Promise<Either<null, ResponseImagensVeiculoType>> {
         try {
             const response = await this.http.post(`${this.resource}`, image)
             return Right.create(response.data.data)

@@ -1,4 +1,4 @@
-export type ImagensVeiculoDataType = {
+export type ResponseImagensVeiculoType = {
     id: number;
     vehicle_id: number;
     descricao: string;

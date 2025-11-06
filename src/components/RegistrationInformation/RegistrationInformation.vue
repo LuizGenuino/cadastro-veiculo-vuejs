@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CadastroVeiculoType } from '@/utils/types';
+import type { CadastroVeiculoType } from '@/stores/types';
 import { defineProps } from 'vue'
 
 

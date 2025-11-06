@@ -16,23 +16,23 @@ export const FOTOS_OPCIONAIS = {
     motor: { titulo: 'Motor', icon: 'mdi-engine' }
 } as const;
 
-export type requiredPhotosKey = keyof typeof FOTOS_OBRIGATORIAS;
+export type chavesFotosObrigatoriaType = keyof typeof FOTOS_OBRIGATORIAS;
 
-export type optionalPhotosKey = keyof typeof FOTOS_OPCIONAIS;
+export type chavesFotosOpcionaisType = keyof typeof FOTOS_OPCIONAIS;
 
-export type CamposExtrasValueType = {
+export type FormCamposExtrasType = {
     config_id: number | null;
     valor: any | null;
 }
 
-export interface PhotoData {
+export type ObjetoFotoType = {
     file: File | null;
     url: string;
 }
 
-export type PhotoInfo = {
+export type InfoFotosType = {
     id: number;
-    key: requiredPhotosKey | optionalPhotosKey;
+    key: chavesFotosObrigatoriaType | chavesFotosOpcionaisType;
     descricao: string;
     image_url: string;
     is_primary: boolean;
@@ -63,9 +63,9 @@ export type CadastroVeiculoType = {
     kmRodado: number;
     estadoConservacao: string;
     motivoVenda: string;
-    campos_extras: Record<string, CamposExtrasValueType>;
-    fotos_obrigatorias: PhotoInfo[];
-    fotos_opcionais: PhotoInfo[];
+    campos_extras: Record<string, FormCamposExtrasType>;
+    fotos_obrigatorias: InfoFotosType[];
+    fotos_opcionais: InfoFotosType[];
     lista_veiculos_fipe?: VeiculosFipeType[]
 }
 

@@ -16,7 +16,8 @@ function onClick() {
             <div :class="`d-flex flex-row justify-space-between align-center pa-4 ${smAndUp ? 'bg-primary' : ''}`">
                 <p :class="`text-h6 font-weight-bold  ${!smAndUp ? 'text-primary' : ''}`">P84</p>
 
-                <v-btn color="bg-component" :icon="theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'" @click="onClick"></v-btn>
+                <v-btn color="bg-component" :icon="theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+                    @click="onClick"></v-btn>
             </div>
 
             <v-main id="main-component">

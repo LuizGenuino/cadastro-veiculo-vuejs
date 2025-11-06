@@ -1,5 +1,5 @@
 import type { LocationQuery } from "vue-router";
-import type { CadastroVeiculoType } from "./types";
+import type { CadastroVeiculoType } from "../stores/types";
 
 export function transformDataToQueryParameters(data: Partial<CadastroVeiculoType>): Record<string, string> {
     const queryParams: Record<string, string> = {};

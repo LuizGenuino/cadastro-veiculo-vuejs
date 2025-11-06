@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineModel, watch, computed , defineProps} from 'vue'
+import { defineModel, watch, computed, defineProps } from 'vue'
 
 const model = defineModel<string>('model')
 
@@ -49,7 +49,7 @@ watch(model, (newVal) => {
 <template>
     <div class="mx-100">
         <v-text-field v-model:model-value="model" :rules="validationRules" :label="props.label" variant="outlined"
-            :readonly="props.loading" :loading="props.loading"  prepend-inner-icon="mdi-card-text">
+            :readonly="props.loading" :loading="props.loading" prepend-inner-icon="mdi-card-text">
             <template #append-inner>
                 <slot name="append-inner">
                 </slot>

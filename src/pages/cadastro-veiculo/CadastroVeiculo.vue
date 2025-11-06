@@ -6,10 +6,10 @@ import { useVeiculo } from '@/stores/veiculo'
 import { httpService } from '@/services/http'
 import { toast } from '@/utils/swal/toast'
 
-import type { CadastroVeiculoType } from '@/utils/types'
+import type { CadastroVeiculoType } from '@/stores/types'
 import type { UserStoresType } from '@/services/http/usuario/types'
 import { useUsuario } from '@/stores/usuario'
-import type { VehicleRegistrationFormType, VeiculoDataType } from '@/services/http/cadastro-veiculo/types'
+import type { FormRegistroVeiculoType, ResponseVeiculoType } from '@/services/http/cadastro-veiculo/types'
 
 const router = useRouter()
 const loadingStore = useLoading()
@@ -45,7 +45,7 @@ function clearForm() {
     form.value.lista_veiculos_fipe = undefined
 }
 
-async function nextPage(data: VeiculoDataType) {
+async function nextPage(data: ResponseVeiculoType) {
     clearForm()
 
     form.value.id = data.id
@@ -93,7 +93,7 @@ async function onSubmit() {
     }
 
     try {
-        const formVeiculo: VehicleRegistrationFormType = {
+        const formVeiculo: FormRegistroVeiculoType = {
             customer_name: form.value.nome_proprietario ?? '',
             customer_phone: form.value.telefone_proprietario ?? '',
             store_id: selectedStore.value?.id ?? 0,
@@ -104,7 +104,7 @@ async function onSubmit() {
         isLoading.value = true
         loadingStore.show('Cadastrando veículo...')
 
-        const response = await httpService.veiculo.create(formVeiculo)
+        const response = await httpService.veiculo.cadastrar(formVeiculo)
 
         if (response.isRight() && response.value) {
             await nextPage(response.value)
@@ -131,7 +131,7 @@ async function fetchUserStores() {
             return
         }
 
-        const response = await httpService.usuario.currentUser()
+        const response = await httpService.usuario.usuarioAtual()
 
         if (response.isRight()) {
 

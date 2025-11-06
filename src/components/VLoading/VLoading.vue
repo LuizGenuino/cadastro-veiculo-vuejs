@@ -16,9 +16,8 @@ const loading = useLoading()
                         <v-progress-circular indeterminate size="50" color="primary" />
                     </v-col>
                     <v-col cols="12" align="center">
-                        <span class="text-subtitle-1 font-weight-regular" >{{ loading.state.message }}</span>
+                        <span class="text-subtitle-1 font-weight-regular">{{ loading.state.message }}</span>
                     </v-col>
-
                 </v-row>
             </v-card-text>
         </v-card>

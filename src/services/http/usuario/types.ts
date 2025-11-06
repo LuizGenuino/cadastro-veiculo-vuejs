@@ -1,4 +1,4 @@
-export type UsuarioDataType = {
+export type ResponseUsuarioType = {
     user_name: string,
     isFinance: boolean,
     phone: string,

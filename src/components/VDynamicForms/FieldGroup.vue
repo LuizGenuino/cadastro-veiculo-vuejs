@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, defineModel, defineProps } from 'vue';
 import type { CamposExtrasType } from '@/services/http/campos-extras/types';
-import type { CadastroVeiculoType } from '@/utils/types';
+import type { CadastroVeiculoType } from '@/stores/types';
 
 const extraFieldsModel = defineModel<Partial<CadastroVeiculoType>>('extraFieldsModel', { required: true });
 

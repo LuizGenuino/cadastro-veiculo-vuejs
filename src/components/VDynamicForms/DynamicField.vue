@@ -2,10 +2,10 @@
 import { computed, defineProps, defineModel, watch } from 'vue';
 import type { CamposExtrasType } from '@/services/http/campos-extras/types';
 import { VTextField, VSelect, VNumberInput } from 'vuetify/components';
-import type { CamposExtrasValueType } from '@/utils/types';
+import type { FormCamposExtrasType } from '@/stores/types';
 
 
-const model = defineModel<CamposExtrasValueType>('model', { required: true });
+const model = defineModel<FormCamposExtrasType>('model', { required: true });
 
 const props = defineProps<{
     field: CamposExtrasType,

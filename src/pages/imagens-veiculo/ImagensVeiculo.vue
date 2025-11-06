@@ -3,7 +3,7 @@ import { httpService } from '@/services/http';
 import { useLoading } from '@/stores/loading';
 import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
-import { FOTOS_OBRIGATORIAS, type CadastroVeiculoType, type PhotoData, type PhotoInfo, type requiredPhotosKey } from '@/utils/types';
+import { FOTOS_OBRIGATORIAS, type CadastroVeiculoType, type chavesFotosObrigatoriaType, type InfoFotosType, type ObjetoFotoType, } from '@/stores/types';
 import { ref, computed, watch, defineModel } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -12,7 +12,7 @@ const router = useRouter();
 
 const form = ref<Partial<CadastroVeiculoType>>({});
 
-const fotos = ref<Partial<Record<requiredPhotosKey, PhotoData>>>({});
+const fotos = ref<Partial<Record<chavesFotosObrigatoriaType, ObjetoFotoType>>>({});
 
 const isLoading = ref<boolean>(false);
 
@@ -39,7 +39,7 @@ const onSubmit = async () => {
             return;
         }
 
-        const arrayFotos = Object.entries(fotos.value) as Array<[requiredPhotosKey, PhotoData | undefined]>;
+        const arrayFotos = Object.entries(fotos.value) as Array<[chavesFotosObrigatoriaType, ObjetoFotoType | undefined]>;
 
         const verifyPhoto = arrayFotos.some(([key, photo]) => {
             return !photo?.file && photo?.url;
@@ -65,7 +65,7 @@ const onSubmit = async () => {
         isLoading.value = true;
 
         let ordem = 0;
-        let fotosEnviadas: PhotoInfo[] = [];
+        let fotosEnviadas: InfoFotosType[] = [];
         for (const [key, photo] of arrayFotos) {
             if (photo?.file) {
 
@@ -78,7 +78,7 @@ const onSubmit = async () => {
                 formData.append('vehicle_id', form.value.id?.toString() || '');
                 formData.append('arquivo', photo.file);
 
-                const response = await httpService.midia.upload(formData);
+                const response = await httpService.midia.salvarImagem(formData);
 
                 if (response.isRight() && response.value) {
                     fotos.value[key] = {
@@ -87,7 +87,7 @@ const onSubmit = async () => {
                     }
                     fotosEnviadas.push({
                         id: response.value.id,
-                        key: key,
+                        key: key as chavesFotosObrigatoriaType,
                         descricao: response.value.descricao,
                         image_url: response.value.image_url,
                         is_primary: response.value.is_primary,
@@ -126,7 +126,7 @@ onMounted(() => {
 
     if (data.fotos_obrigatorias && data.fotos_obrigatorias.length > 0) {
         data.fotos_obrigatorias.forEach(photoInfo => {
-            const key = photoInfo.key as requiredPhotosKey;
+            const key = photoInfo.key as chavesFotosObrigatoriaType;
             fotos.value[key] = {
                 file: null,
                 url: photoInfo.image_url

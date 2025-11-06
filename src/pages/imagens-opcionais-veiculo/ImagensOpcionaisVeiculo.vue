@@ -4,14 +4,14 @@ import { ref, computed, onUnmounted } from 'vue'
 import SuccessDialog from './components/SuccessDialog.vue';
 import { useLoading } from '@/stores/loading';
 import { toast } from '@/utils/swal/toast';
-import { FOTOS_OPCIONAIS, type CadastroVeiculoType, type optionalPhotosKey, type PhotoData, type PhotoInfo } from '@/utils/types';
+import { FOTOS_OPCIONAIS, type CadastroVeiculoType, type chavesFotosOpcionaisType, type InfoFotosType, type ObjetoFotoType } from '@/stores/types';
 import { useVeiculo } from '@/stores/veiculo';
 import { httpService } from '@/services/http';
 
 
 const form = ref<Partial<CadastroVeiculoType>>({});
 
-const fotos = ref<Partial<Record<optionalPhotosKey, PhotoData>>>({});
+const fotos = ref<Partial<Record<chavesFotosOpcionaisType, ObjetoFotoType>>>({});
 
 
 const isSuccessModalVisible = ref(false)
@@ -25,7 +25,7 @@ const onSubmit = async () => {
         useLoading().show("Enviando Fotos Opcionais...")
         isLoading.value = true;
 
-        const arrayFotos = Object.entries(fotos.value) as Array<[optionalPhotosKey, PhotoData | undefined]>;
+        const arrayFotos = Object.entries(fotos.value) as Array<[chavesFotosOpcionaisType, ObjetoFotoType | undefined]>;
 
         if (arrayFotos.length === 0) {
             await useVeiculo().clear();
@@ -59,7 +59,7 @@ const onSubmit = async () => {
         isLoading.value = true;
 
         let ordem = 0;
-        let fotosEnviadas: PhotoInfo[] = [];
+        let fotosEnviadas: InfoFotosType[] = [];
         for (const [key, photo] of arrayFotos) {
             if (photo?.file) {
 
@@ -72,7 +72,7 @@ const onSubmit = async () => {
                 formData.append('vehicle_id', form.value.id?.toString() || '');
                 formData.append('arquivo', photo.file);
 
-                const response = await httpService.midia.upload(formData);
+                const response = await httpService.midia.salvarImagem(formData);
 
                 if (response.isRight() && response.value) {
                     fotos.value[key] = {
@@ -81,7 +81,7 @@ const onSubmit = async () => {
                     }
                     fotosEnviadas.push({
                         id: response.value.id,
-                        key: key,
+                        key: key as chavesFotosOpcionaisType,
                         descricao: response.value.descricao,
                         image_url: response.value.image_url,
                         is_primary: response.value.is_primary,
@@ -115,7 +115,7 @@ onMounted(() => {
 
     if (data.fotos_opcionais && data.fotos_opcionais.length > 0) {
         data.fotos_opcionais.forEach(photoInfo => {
-            const key = photoInfo.key as optionalPhotosKey;
+            const key = photoInfo.key as chavesFotosOpcionaisType;
             fotos.value[key] = {
                 file: null,
                 url: photoInfo.image_url

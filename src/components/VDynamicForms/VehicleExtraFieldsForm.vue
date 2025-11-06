@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, defineModel, defineProps, watch, ref, onMounted } from 'vue';
 import type { CamposExtrasType, MetadataType } from '@/services/http/campos-extras/types';
-import type { CadastroVeiculoType } from '@/utils/types';
+import type { CadastroVeiculoType } from '@/stores/types';
 import { useLoading } from '@/stores/loading';
 import { toast } from '@/utils/swal/toast';
 import { httpService } from '@/services/http';
@@ -45,7 +45,7 @@ watchEffect(() => {
     const currentExtras = model.value.campos_extras;
     camposDadosExtras.value.forEach(field => {
         if (!(field.field_key in currentExtras)) {
-            currentExtras[field.field_key] = { config_id: null, valor: null};
+            currentExtras[field.field_key] = { config_id: null, valor: null };
         }
     });
 });
@@ -63,11 +63,11 @@ watch(
 
 async function fetchVehicleExtraFields() {
     loadingStore.show('Carregando campos extras...');
-    
+
     isLoadingFields.value = true;
 
     try {
-        const response = await httpService.camposExtras.list();
+        const response = await httpService.camposExtras.listar();
         if (response.isRight()) {
             controleDadosExtras.value = response.value?.control.metadata as MetadataType;
             camposDadosExtras.value = response.value?.data as CamposExtrasType[];

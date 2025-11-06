@@ -1,4 +1,4 @@
-export type CamposExtrasResponseType = {
+export type ResponseCamposExtrasType = {
     isArray: boolean,
     length: number,
     path: string,

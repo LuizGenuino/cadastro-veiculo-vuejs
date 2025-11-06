@@ -54,7 +54,7 @@ watch(model, (newValue) => {
 <template>
     <div class="mx-100">
         <v-text-field v-model:model-value="model" :rules="validationRules" :label="props.label" variant="outlined"
-            :readonly="props.loading" :loading="props.loading" maxlength="17"  prepend-inner-icon="mdi-phone">
+            :readonly="props.loading" :loading="props.loading" maxlength="17" prepend-inner-icon="mdi-phone">
             <template #append-inner>
                 <slot name="append-inner">
                 </slot>

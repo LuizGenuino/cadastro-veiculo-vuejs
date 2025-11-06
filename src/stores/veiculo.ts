@@ -1,7 +1,7 @@
 // Utilities
 import { httpService } from '@/services/http'
 import { parseQueryParametersToData, transformDataToQueryParameters } from '@/utils/queryParameters'
-import type { CadastroVeiculoType } from '@/utils/types'
+import type { CadastroVeiculoType } from '@/stores/types'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'

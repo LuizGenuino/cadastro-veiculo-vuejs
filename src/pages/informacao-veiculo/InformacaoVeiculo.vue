@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { httpService } from '@/services/http';
-import type { AdditionalInformationDataType, AdditionalInformationFormType } from '@/services/http/cadastro-veiculo/types';
 import { useLoading } from '@/stores/loading';
 import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
-import { type CadastroVeiculoType, type CamposExtrasValueType, type FormStateType } from '@/utils/types';
+import { type CadastroVeiculoType, type FormCamposExtrasType, type FormStateType } from '@/stores/types';
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { da } from 'vuetify/locale';
+import type { FormInformacoesAdicionaisType, ResponseInformacoesAdicionaisType } from '@/services/http/cadastro-veiculo/types';
 
 
 const ESTADOS_CONSERVACAO = [
@@ -48,7 +47,7 @@ const isFormCompletelyValid = computed(() => {
     return isBasicFormValid.value
 });
 
-function ExtraFieldWithOutNullValue(extraFields: Record<string, any>): Record<string, CamposExtrasValueType> {
+function ExtraFieldWithOutNullValue(extraFields: Record<string, any>): Record<string, FormCamposExtrasType> {
     return Object.fromEntries(
         Object.entries(extraFields)
             .filter(([_, value]) => value?.valor !== null && value?.valor !== '')
@@ -61,10 +60,10 @@ function ExtraFieldWithOutNullValue(extraFields: Record<string, any>): Record<st
 
                 return [key, v] as const;
             })
-    ) as Record<string, CamposExtrasValueType>;
+    ) as Record<string, FormCamposExtrasType>;
 }
 
-async function nextPage(data: AdditionalInformationDataType) {
+async function nextPage(data: ResponseInformacoesAdicionaisType) {
     const token = router.currentRoute.value.params as { token?: string }
 
     form.value.valorDesejado = data.desired_value;
@@ -91,7 +90,7 @@ async function onSubmit() {
         isLoading.value = true
         loadingStore.show("Salvando Informações Extras...")
 
-        const formVeiculo: AdditionalInformationFormType = {
+        const formVeiculo: FormInformacoesAdicionaisType = {
             vehicle_id: Number(form.value.id) || 0,
             desired_value: Number(formState.valorDesejado.replace('.', '').replace(',', '.')) || 0,
             mileage: Number(formState.kmRodado.replace('.', '')) || 0,
@@ -100,7 +99,7 @@ async function onSubmit() {
             extra_fields: ExtraFieldWithOutNullValue(form.value.campos_extras || {}),
         }
 
-        const response = await httpService.veiculo.insertAdditionalInformation(formVeiculo);
+        const response = await httpService.veiculo.cadastrarDadosExtras(formVeiculo);
 
         if (response.isRight() && response.value) {
             await nextPage(response.value)

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { httpService } from '@/services/http';
-import type { VehicleFipeSelectionFormType, VeiculoDataType, VeiculosFipeType } from '@/services/http/cadastro-veiculo/types';
+import type { FormSelecaoVeiculoFipeType, ResponseVeiculoType, VeiculosFipeType } from '@/services/http/cadastro-veiculo/types';
 import { useLoading } from '@/stores/loading';
 import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
-import type { CadastroVeiculoType } from '@/utils/types';
+import type { CadastroVeiculoType } from '@/stores/types';
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -32,7 +32,7 @@ const precoFormatado = computed<number>(() => {
     return 0;
 });
 
-async function nextPage(data: VeiculoDataType) {
+async function nextPage(data: ResponseVeiculoType) {
     const token = router.currentRoute.value.params as { token?: string }
     form.value.etapa_atual = 'informacao-veiculo'
     form.value.id_veiculo_fipe = veiculoSelecionado.value?.id
@@ -61,7 +61,7 @@ async function onSubmit() {
     try {
         loadingStore.show("Salvando Escolha....")
 
-        const formVeiculo: VehicleFipeSelectionFormType = {
+        const formVeiculo: FormSelecaoVeiculoFipeType = {
             id: form.value.id ?? 0,
             fipe_code: veiculoSelecionado.value.fipe_codigo,
             fipe_value: precoFormatado.value,
@@ -69,7 +69,7 @@ async function onSubmit() {
             year_model: Number(veiculoSelecionado.value.ano_modelo),
         }
 
-        const response = await httpService.veiculo.selectVehicle(formVeiculo);
+        const response = await httpService.veiculo.selecionarFipe(formVeiculo);
 
         if (response.isRight() && response.value) {
             await nextPage(response.value)

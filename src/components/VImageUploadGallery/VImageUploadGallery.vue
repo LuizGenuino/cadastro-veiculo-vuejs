@@ -1,20 +1,20 @@
 <script setup lang="ts">
+import type { ObjetoFotoType } from '@/stores/types';
 import { toast } from '@/utils/swal/toast';
-import { type PhotoData } from '@/utils/types';
 import { ref, computed, watch, defineModel } from 'vue'
 
-type objetoFotosType = {
+type FotosType = {
     titulo: string;
     icon: string;
     class?: string;
 }
 
-const fotos = defineModel<Record<string, PhotoData>>('fotos', { default: {} });
+const fotos = defineModel<Record<string, ObjetoFotoType>>('fotos', { default: {} });
 
 const formVerification = defineModel<boolean>('formVerification', { default: false });
 
 const props = defineProps<{
-    objetoFotos: Record<string, objetoFotosType>;
+    objetoFotos: Record<string, FotosType>;
 }>()
 
 const draggingKey = ref<string | null>(null)
@@ -128,7 +128,7 @@ const removePhoto = (key: string) => {
     }
 }
 
-function handlePhotoUpdate(key: string, newPhotoData: PhotoData) {
+function handlePhotoUpdate(key: string, newPhotoData: ObjetoFotoType) {
     if (fotos.value[key]) {
         fotos.value[key] = newPhotoData;
     }
