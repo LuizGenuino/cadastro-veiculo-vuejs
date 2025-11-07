@@ -7,6 +7,7 @@ import { type CadastroVeiculoType, type FormCamposExtrasType, type FormStateType
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import type { FormInformacoesAdicionaisType, ResponseInformacoesAdicionaisType } from '@/services/http/cadastro-veiculo/types';
+import { formatStringToNumber } from '@/utils/numberFormatter';
 
 
 const ESTADOS_CONSERVACAO = [
@@ -65,7 +66,7 @@ function ExtraFieldWithOutNullValue(extraFields: Record<string, any>): Record<st
 async function nextPage(data: ResponseInformacoesAdicionaisType) {
     const token = router.currentRoute.value.params as { token?: string }
 
-    form.value.valorDesejado = data.desired_value;
+    form.value.valorDesejado = typeof data.desired_value === "number" ? data.desired_value : formatStringToNumber(data.desired_value);
     form.value.kmRodado = data.mileage;
     form.value.estadoConservacao = data.conservation_state;
     form.value.motivoVenda = data.sale_reason;
@@ -91,8 +92,8 @@ async function onSubmit() {
 
         const formVeiculo: FormInformacoesAdicionaisType = {
             vehicle_id: Number(form.value.id) || 0,
-            desired_value: Number(formState.valorDesejado.replace('.', '').replace(',', '.')) || 0,
-            mileage: Number(formState.kmRodado.replace('.', '')) || 0,
+            desired_value: formatStringToNumber(formState.valorDesejado),
+            mileage: formatStringToNumber(formState.kmRodado),
             conservation_state: formState.estadoConservacao,
             sale_reason: formState.motivoVenda,
             extra_fields: ExtraFieldWithOutNullValue(form.value.campos_extras || {}),

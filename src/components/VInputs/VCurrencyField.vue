@@ -29,9 +29,8 @@ watch(model, (newValue) => {
     if (!newValue) return
 
     const strValue = String(newValue);
-    const hasDecimal = /[.,]\d{0,2}$/.test(strValue);
 
-    const digitos = hasDecimal ? strValue.slice(0, -3).replace(/\D/g, '') : strValue.replace(/\D/g, '');
+    const digitos = strValue.replace(/\D/g, '');
 
     let maskedValue = digitos;
 
