@@ -115,8 +115,8 @@ async function onSubmit() {
                     throw new Error("Falha ao enviar imagem");
                 }
             } catch (err) {
-                console.error(`Erro ao enviar ${key}:`, err);
-                toast(`Erro ao enviar ${key.replace(/_/g, ' ')}.`, 'error');
+                console.error(`Erro ao enviar foto do(a) ${key}:`, err);
+                toast(`Erro ao enviar foto do(a) ${FOTOS_OBRIGATORIAS[key].titulo}.`, 'error');
                 return null;
             }
         });
@@ -130,7 +130,6 @@ async function onSubmit() {
         form.value.fotos_obrigatorias = fotosEnviadas;
 
         if (fotosEnviadas.length < arrayFotos.length) {
-            toast("Algumas imagens não foram enviadas. Verifique e tente novamente.", "warning");
             return;
         }
 
