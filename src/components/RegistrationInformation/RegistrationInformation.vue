@@ -27,7 +27,7 @@ const props = defineProps<{
                         <v-col cols="12" md="6" class="d-flex" v-if="form.marca">
                             <p><b>Marca do Veiculo:</b> {{ form.marca }}</p>
                         </v-col>
-                        <v-col cols="12" md="6" class="d-flex" v-if="form.placa">
+                        <v-col cols="12" md="6" class="d-flex" v-if="form.placa_ou_chassi">
                             <p><b>placa ou Chassi:</b> {{ form.placa_ou_chassi }}</p>
                         </v-col>
                         <v-col cols="12" md="6" class="d-flex" v-if="form.modelo">
