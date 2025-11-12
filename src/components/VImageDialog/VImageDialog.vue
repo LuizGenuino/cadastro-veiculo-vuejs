@@ -17,6 +17,7 @@ const emit = defineEmits(['update:photo'])
 
 const zoomLevel = ref<number>(1);
 const rotateLevel = ref<number>(0);
+const invertImg = ref<number>(1);
 const isLoading = ref<boolean>(false);
 
 
@@ -25,6 +26,10 @@ function updateZoom(factor: number) {
     if (newZoom >= 1 && newZoom <= 3) {
         zoomLevel.value = newZoom;
     }
+}
+
+function invertImage() {
+    invertImg.value = invertImg.value === 1 ? -1 : 1;
 }
 
 function updateRotation(rotate: number) {
@@ -40,7 +45,7 @@ async function applyAndSaveRotation() {
         return;
     }
 
-    if (rotateLevel.value % 360 === 0 && props.foto?.file.type === "image/webp") {
+    if (rotateLevel.value % 360 === 0 && props.foto?.file.type === "image/webp" && invertImg.value === 1) {
         isModalVisible.value = false;
         return;
     }
@@ -77,7 +82,7 @@ async function applyAndSaveRotation() {
     }
 }
 
-function rotateImage(file: File, name: string, degrees: number): Promise<File> {
+async function rotateImage(file: File, name: string, degrees: number): Promise<File> {
 
     return new Promise((resolve, reject) => {
         const image = new Image();
@@ -99,6 +104,7 @@ function rotateImage(file: File, name: string, degrees: number): Promise<File> {
 
             ctx.translate(canvas.width / 2, canvas.height / 2);
             ctx.rotate(radians);
+            ctx.scale(invertImg.value, 1);
 
             if (file.type !== 'image/webp') {
                 ctx.fillStyle = 'white';
@@ -133,6 +139,7 @@ watch(isModalVisible, (newValue) => {
     if (!newValue) {
         zoomLevel.value = 1;
         rotateLevel.value = 0;
+        invertImg.value = 1;
     }
 });
 
@@ -150,8 +157,8 @@ watch(isModalVisible, (newValue) => {
             <v-card-text class="pa-0">
                 <div class="modal-image-container">
                     <v-img :src="foto?.url" class="modal-image"
-                        :style="{ transform: `scale(${zoomLevel}) rotate(${rotateLevel}deg)` }" max-width="100%"
-                        max-height="calc(90vh - 150px)" contain />
+                        :style="{ transform: `scale(${zoomLevel}) rotate(${rotateLevel}deg) scaleX(${invertImg})` }"
+                        max-width="100%" max-height="calc(90vh - 150px)" contain />
                 </div>
             </v-card-text>
             <v-divider />
@@ -160,6 +167,7 @@ watch(isModalVisible, (newValue) => {
                 <v-btn-toggle class="mb-4" :disabled="isLoading">
                     <v-btn class="mx-2" icon="mdi-rotate-left" @click="updateRotation(-90)" />
                     <v-btn class="mx-2" icon="mdi-rotate-right" @click="updateRotation(90)" />
+                    <v-btn class="mx-2" icon="mdi-swap-horizontal" @click="invertImage()" />
                     <v-btn class="mx-2" icon="mdi-magnify-minus" @click="updateZoom(-0.2)" :disabled="zoomLevel <= 1" />
                     <v-btn class="mx-2" icon="mdi-magnify-plus" @click="updateZoom(0.2)" :disabled="zoomLevel >= 3" />
                 </v-btn-toggle>
