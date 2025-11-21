@@ -7,6 +7,7 @@ type FotosType = {
     titulo: string;
     icon: string;
     class?: string;
+    fileName: string;
 }
 
 const fotos = defineModel<Record<string, ObjetoFotoType>>('fotos', { default: {} });
@@ -187,7 +188,7 @@ const openPhotoModal = (key: string) => {
     </div>
     <v-image-dialog v-if="selectedPhotoKey" :foto="fotos[selectedPhotoKey]" v-model:isModalVisible="isModalVisible"
         :selectedPhotoKey="selectedPhotoKey" :removePhoto="removePhoto"
-        :titulo="props.objetoFotos[selectedPhotoKey].titulo" @update:photo="handlePhotoUpdate" />
+        :titulo="props.objetoFotos[selectedPhotoKey].titulo" :file-name="props.objetoFotos[selectedPhotoKey].fileName" @update:photo="handlePhotoUpdate" />
 </template>
 
 <style scoped>

@@ -2,18 +2,18 @@ import type { VeiculosFipeType } from "@/services/http/cadastro-veiculo/types";
 
 
 export const FOTOS_OBRIGATORIAS = {
-    painel: { titulo: 'Painel', icon: 'mdi-speedometer', class: "" },
-    lateralEsquerda: { titulo: 'Lateral Esquerda', icon: 'mdi-motorbike', class: "" },
-    lateralDireita: { titulo: 'Lateral Direita', icon: 'mdi-motorbike', class: "mdi-flip-h" },
-    documento: { titulo: 'Documento', icon: 'mdi-file-document', class: "" }
+    painel: { titulo: 'Painel', icon: 'mdi-speedometer', fileName: "Painel", class: "" },
+    lateralEsquerda: { titulo: 'Lateral Esquerda', icon: 'mdi-motorbike', fileName: "Lateral esquerdo", class: "" },
+    lateralDireita: { titulo: 'Lateral Direita', icon: 'mdi-motorbike', fileName: "Lateral direito", class: "mdi-flip-h" },
+    documento: { titulo: 'Documento', icon: 'mdi-file-document', fileName: "Documento", class: "" }
 } as const;
 
 export const FOTOS_OPCIONAIS = {
-    frente: { titulo: 'Frente', icon: 'mdi-motorbike' },
-    tras: { titulo: 'Tras', icon: 'mdi-card-text' },
-    pneuTraseiro: { titulo: 'Pneu Traseiro', icon: 'mdi-tire' },
-    pneuDianteiro: { titulo: 'Pneu Dianteiro', icon: 'mdi-tire' },
-    motor: { titulo: 'Motor', icon: 'mdi-engine' }
+    frente: { titulo: 'Frente', fileName: 'Frente', icon: 'mdi-motorbike' },
+    tras: { titulo: 'Tras', fileName: 'Trás', icon: 'mdi-card-text' },
+    pneuTraseiro: { titulo: 'Pneu Traseiro', fileName: 'Pneu traseiro', icon: 'mdi-tire' },
+    pneuDianteiro: { titulo: 'Pneu Dianteiro', fileName: 'Pneu dianteiro', icon: 'mdi-tire' },
+    motor: { titulo: 'Motor', fileName: 'Motor', icon: 'mdi-engine' }
 } as const;
 
 export type chavesFotosObrigatoriaType = keyof typeof FOTOS_OBRIGATORIAS;

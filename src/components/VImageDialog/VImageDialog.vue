@@ -7,6 +7,7 @@ const isModalVisible = defineModel<boolean>('isModalVisible', { default: false }
 
 const props = defineProps<{
     titulo: string;
+    fileName: string;
     selectedPhotoKey: string | null;
     foto: ObjetoFotoType | undefined;
     removePhoto: (key: any | null) => void;
@@ -59,7 +60,7 @@ async function applyAndSaveRotation() {
     }
 
     try {
-        const rotatedFile = await rotateImage(photoData.file, props.selectedPhotoKey, rotateLevel.value);
+        const rotatedFile = await rotateImage(photoData.file, props.fileName, rotateLevel.value);
 
         const newPhotoData: ObjetoFotoType = {
             file: rotatedFile,
