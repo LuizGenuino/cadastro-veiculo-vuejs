@@ -16,7 +16,6 @@ const loadingStore = useLoading()
 const veiculoStore = useVeiculo()
 
 const form = ref<Partial<CadastroVeiculoType>>({})
-
 const lojasUsuario = ref<UserStoresType[]>([])
 const selectedStore = ref<UserStoresType | null>(null)
 const isFormValid = ref(false)
@@ -160,7 +159,6 @@ async function fetchUserStores() {
 onMounted(async () => {
     await fetchUserStores()
     const savedData = veiculoStore.get()
-
     form.value = { ...savedData }
 
     if (savedData.id_loja_usuario && lojasUsuario.value.length) {

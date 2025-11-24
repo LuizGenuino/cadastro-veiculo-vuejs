@@ -158,7 +158,6 @@ onUnmounted(() => {
 
 <template>
     <registration-information :form="form" />
-
     <v-form-card :loading="isLoading" card-title="CADASTRO DE VEÍCULO"
         card-subtitle="Adicione fotos extras para valorizar seu anúncio" submit-text="Salvar e Finalizar"
         @submit.prevent="onSubmit">

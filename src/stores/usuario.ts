@@ -1,17 +1,17 @@
 // Utilities
 
-import type { UsuarioDataType } from '@/services/http/usuario/types';
+import type { ResponseUsuarioType } from '@/services/http/usuario/types';
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useUsuario = defineStore('usuario', () => {
-    const state = ref<Partial<UsuarioDataType>>({})
+    const state = ref<Partial<ResponseUsuarioType>>({})
 
-    function get(): UsuarioDataType {
-        return state.value as UsuarioDataType;
+    function get(): ResponseUsuarioType {
+        return state.value as ResponseUsuarioType;
     }
 
-    async function set(data: Partial<UsuarioDataType>) {
+    async function set(data: Partial<ResponseUsuarioType>) {
         state.value = { ...state.value, ...data }
     }
 

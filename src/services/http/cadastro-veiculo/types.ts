@@ -1,4 +1,4 @@
-import type { CamposExtrasType } from "@/stores/types"
+import type { FormCamposExtrasType } from "@/stores/types"
 
 export type FormRegistroVeiculoType = {
     customer_name: string,
@@ -22,7 +22,8 @@ export type FormInformacoesAdicionaisType = {
     mileage: number,
     conservation_state: string,
     sale_reason: string,
-    extra_fields: Record<string, CamposExtrasType>
+    observation: string | null
+    extra_fields: Record<string, FormCamposExtrasType>
 }
 
 export type ResponseVeiculoType = {
@@ -83,6 +84,7 @@ export type ResponseInformacoesAdicionaisType = {
     mileage: number,
     conservation_state: string,
     sale_reason: string,
+    observation: string | null,
     extra_fields: ResponseDadosExtrasType[]
 }
 

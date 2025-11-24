@@ -63,6 +63,7 @@ export type CadastroVeiculoType = {
     kmRodado: number;
     estadoConservacao: string;
     motivoVenda: string;
+    observacao: string | null;
     campos_extras: Record<string, FormCamposExtrasType>;
     fotos_obrigatorias: InfoFotosType[];
     fotos_opcionais: InfoFotosType[];
@@ -76,5 +77,6 @@ export interface FormStateType {
     kmRodado: string;
     estadoConservacao: string;
     motivoVenda: string;
+    observacao: string | null;
 }
 

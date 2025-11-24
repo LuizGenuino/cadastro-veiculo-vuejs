@@ -11,12 +11,19 @@ import { formatStringToNumber } from '@/utils/numberFormatter';
 
 
 const ESTADOS_CONSERVACAO = [
-    "EXCELENTE", "BOM", "REGULAR", "RUIM"
+    "Excelente",
+    "Ótimo",
+    "Bom",
+    "Regular",
+    "Ruim",
+    "Péssimo",
 ];
 
 const MOTIVOS_VENDA = [
-    'Troca por outro veículo', 'Necessidade financeira', 'Mudança de cidade',
-    'Não uso mais', 'Upgrade de modelo', 'Outros'
+    "Apenas venda",
+    "Lance de consórcio",
+    "Troca em 0km",
+    "Troca em usada",
 ];
 
 const router = useRouter()
@@ -30,6 +37,7 @@ const formState = reactive<FormStateType>({
     kmRodado: '',
     estadoConservacao: '',
     motivoVenda: '',
+    observacao: null
 });
 
 const isLoading = ref(false);
@@ -70,6 +78,7 @@ async function nextPage(data: ResponseInformacoesAdicionaisType) {
     form.value.kmRodado = data.mileage;
     form.value.estadoConservacao = data.conservation_state;
     form.value.motivoVenda = data.sale_reason;
+    form.value.observacao = data.observation;
     form.value.etapa_atual = 'imagens-veiculo';
 
     await veiculoStore.set(form.value as CadastroVeiculoType);
@@ -96,6 +105,7 @@ async function onSubmit() {
             mileage: formatStringToNumber(formState.kmRodado),
             conservation_state: formState.estadoConservacao,
             sale_reason: formState.motivoVenda,
+            observation: formState.observacao,
             extra_fields: ExtraFieldWithOutNullValue(form.value.campos_extras || {}),
         }
 
@@ -160,6 +170,10 @@ onMounted(() => {
             <v-col cols="12">
                 <v-select v-model="formState.motivoVenda" label="MOTIVO DA VENDA*" :items="MOTIVOS_VENDA"
                     :readonly="isLoading" :rules="[validators.required]" variant="outlined" />
+            </v-col>
+            <v-col cols="12">
+                <v-textarea label="OBSERVAÇÕES" :readonly="isLoading" v-model="formState.observacao" variant="outlined"
+                    rows="5"></v-textarea>
             </v-col>
         </v-row>
 
