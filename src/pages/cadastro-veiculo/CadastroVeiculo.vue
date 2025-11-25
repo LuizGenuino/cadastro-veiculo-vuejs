@@ -51,10 +51,17 @@ async function nextPage(data: ResponseVeiculoType) {
     form.value.id_loja_usuario = data.store_id
     form.value.nome_loja_usuario = data.store_name
     form.value.short_id = data.short_id
+    form.value.key_uid = data.key_uid
     const token = router.currentRoute.value.params as { token?: string }
     form.value.etapa_atual = 'informacao-veiculo'
 
     if (data.fipes === null) {
+        form.value.ano_fabricacao = data.year_manufacture || undefined
+        form.value.ano_modelo = data.year_model || undefined
+        form.value.marca = data.vehicle_brand || undefined
+        form.value.modelo = data.vehicle_model || undefined
+        form.value.placa = data.plate || undefined
+        form.value.chassi = data.chassis || undefined
         await veiculoStore.set(form.value as CadastroVeiculoType)
         router.push({ path: `/informacao-veiculo/${token.token}` });
         return

@@ -1,12 +1,19 @@
 <script setup lang="ts">
+
+import type { CadastroVeiculoType } from '@/stores/types';
 import { defineModel } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter();
+
+const props = defineProps<{
+    form?: Partial<CadastroVeiculoType>
+}>()
+
 const isModalVisible = defineModel<boolean>('isModalVisible', { default: false });
 
 function visualizarVeiculo() {
-    window.open('https://app.pitom.com.br/avaliacoes', '_parent');
+    window.open(`https://app.pitom.com.br/avaliacao/${props.form?.key_uid}`, '_parent');
 }
 
 function cadastrarNovo() {

@@ -74,7 +74,7 @@ const onSubmit = async () => {
             formData.append('is_doc', isDocs.toString());
             formData.append('thumbnails', (!isDocs).toString());
             formData.append('vehicle_id', form.value.id?.toString() || '');
-            formData.append('arquivo', photo.file);
+            formData.append('arquivo', photo.file, `${FOTOS_OPCIONAIS[key].fileName}.webp`);
 
             try {
                 const response = await httpService.midia.salvarImagem(formData);
@@ -165,7 +165,7 @@ onUnmounted(() => {
         <v-image-upload-gallery v-model:fotos="fotos" :objeto-fotos="FOTOS_OPCIONAIS" />
     </v-form-card>
 
-    <SuccessDialog :is-modal-visible="isSuccessModalVisible"></SuccessDialog>
+    <SuccessDialog :is-modal-visible="isSuccessModalVisible" :form="form"></SuccessDialog>
 </template>
 
 <style scoped></style>

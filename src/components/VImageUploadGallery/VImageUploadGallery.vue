@@ -2,6 +2,7 @@
 import type { ObjetoFotoType } from '@/stores/types';
 import { toast } from '@/utils/swal/toast';
 import { ref, computed, watch, defineModel } from 'vue'
+import heic2any from "heic2any";
 
 type FotosType = {
     titulo: string;
@@ -51,6 +52,22 @@ const triggerFileInput = (key: string) => {
     fileInputRef.value?.click();
 }
 
+function isHEIC(file: File): boolean {
+    if (!file) return false;
+
+    if (file.type) {
+        const ext = file.type.replace("image/", "").toLowerCase();
+        return ext === "heic" || ext === "heif";
+    }
+
+    if (file.name) {
+        const ext = file.name.split(".").pop()?.toLowerCase();
+        return ext === "heic" || ext === "heif";
+    }
+
+    return false;
+}
+
 const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
@@ -68,6 +85,7 @@ const handleFileSelect = async (event: Event) => {
         return;
     }
 
+
     uploading.value[key] = true;
     uploadProgress.value[key] = 0;
     isUploading.value = true
@@ -79,10 +97,27 @@ const handleFileSelect = async (event: Event) => {
             await new Promise(resolve => setTimeout(resolve, 150));
         }
 
-        fotos.value[key] = {
-            file,
-            url: URL.createObjectURL(file)
-        };
+        if (!isHEIC(file)) {
+            fotos.value[key] = {
+                file,
+                url: URL.createObjectURL(file)
+            };
+        } else {
+            const result = await heic2any({
+                blob: file,
+                toType: "image/webp",
+                quality: 0.6,
+            });
+
+            const blob = Array.isArray(result) ? result[0] : result;
+            const newFile = new File([blob], props.objetoFotos[key].fileName, { type: 'image/webp' });
+
+            fotos.value[key] = {
+                file: newFile,
+                url: URL.createObjectURL(newFile)
+            };
+        }
+
         openPhotoModal(key)
 
     } catch (error) {
@@ -183,12 +218,13 @@ const openPhotoModal = (key: string) => {
             Progresso: {{ Object.keys(fotos).length }} de {{ Object.keys(props.objetoFotos).length }} fotos enviadas.
         </p>
 
-        <input ref="fileInputRef" type="file" accept=".jpg, .jpeg, .png, .gif, .bmp, .tiff, .heic, .webp, .svg"
-            capture="environment" style="display: none" @change="handleFileSelect" />
+        <input ref="fileInputRef" type="file" accept=".jpg, .jpeg, .png, .heic, .webp, .svg" capture="environment"
+            style="display: none" @change="handleFileSelect" />
     </div>
     <v-image-dialog v-if="selectedPhotoKey" :foto="fotos[selectedPhotoKey]" v-model:isModalVisible="isModalVisible"
         :selectedPhotoKey="selectedPhotoKey" :removePhoto="removePhoto"
-        :titulo="props.objetoFotos[selectedPhotoKey].titulo" :file-name="props.objetoFotos[selectedPhotoKey].fileName" @update:photo="handlePhotoUpdate" />
+        :titulo="props.objetoFotos[selectedPhotoKey].titulo" :file-name="props.objetoFotos[selectedPhotoKey].fileName"
+        @update:photo="handlePhotoUpdate" />
 </template>
 
 <style scoped>

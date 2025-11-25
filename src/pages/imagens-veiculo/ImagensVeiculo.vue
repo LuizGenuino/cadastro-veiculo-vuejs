@@ -90,7 +90,7 @@ async function onSubmit() {
             formData.append('is_doc', isDocs.toString());
             formData.append('thumbnails', (!isDocs).toString());
             formData.append('vehicle_id', form.value.id?.toString() || '');
-            formData.append('arquivo', photo.file);
+            formData.append('arquivo', photo.file, `${FOTOS_OBRIGATORIAS[key].fileName}.webp`);
 
             try {
                 const response = await httpService.midia.salvarImagem(formData);

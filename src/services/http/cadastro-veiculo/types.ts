@@ -28,6 +28,7 @@ export type FormInformacoesAdicionaisType = {
 
 export type ResponseVeiculoType = {
     id: number,
+    key_uid: string,
     customer_name: string,
     customer_phone: string,
     plate: string,

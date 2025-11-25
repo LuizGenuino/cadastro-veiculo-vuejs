@@ -44,6 +44,7 @@ export type InfoFotosType = {
 export type CadastroVeiculoType = {
     etapa_atual: string | null;
     id?: number;
+    key_uid: string;
     short_id?: string;
     id_loja_usuario: number;
     nome_loja_usuario: string;
