@@ -30,6 +30,9 @@ export function parseQueryParametersToData(query: LocationQuery): Partial<Cadast
             } else if (Array.isArray(value)) {
                 (data as any)[key] = value[0];
             } else {
+                if (value === "null" || value === "undefined") {
+                    continue;
+                }
                 (data as any)[key] = value;
             }
         }

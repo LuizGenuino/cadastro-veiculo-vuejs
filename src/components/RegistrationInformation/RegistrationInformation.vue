@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CadastroVeiculoType } from '@/stores/types';
+import { formatNumberToString } from '@/utils/numberFormatter';
 import { defineProps } from 'vue'
 
 
@@ -18,8 +19,8 @@ const props = defineProps<{
                 </v-expansion-panel-title>
                 <v-expansion-panel-text>
                     <v-row>
-                         <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.nome_loja_usuario">
-                            <p><b>Loja:</b> {{  form.nome_loja_usuario }}</p>
+                        <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.nome_loja_usuario">
+                            <p><b>Loja:</b> {{ form.nome_loja_usuario }}</p>
                         </v-col>
                         <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.nome_proprietario">
                             <p><b>Cliente:</b> {{ form.nome_proprietario }}</p>
@@ -30,23 +31,36 @@ const props = defineProps<{
                         <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.marca">
                             <p><b>Marca do Veiculo:</b> {{ form.marca }}</p>
                         </v-col>
-                          <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.placa">
+                        <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.placa">
                             <p><b>placa:</b> {{ form.placa }}</p>
                         </v-col>
-                          <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.chassi">
+                        <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.chassi">
                             <p><b>Chassi:</b> {{ form.chassi }}</p>
                         </v-col>
-                        <v-col cols="12" md="6" lg="4" class="d-flex" v-if="!form.placa && !form.chassi && form.placa_ou_chassi">
+                        <v-col cols="12" md="6" lg="4" class="d-flex"
+                            v-if="!form.placa && !form.chassi && form.placa_ou_chassi">
                             <p><b>placa ou Chassi:</b> {{ form.placa_ou_chassi }}</p>
                         </v-col>
                         <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.modelo">
                             <p><b>Modelo:</b> {{ form.modelo }}</p>
                         </v-col>
                         <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.valor_fipe">
-                            <p><b>Valor FIPE:</b> {{ form.valor_fipe }}</p>
+                            <p><b>Valor FIPE:</b>R$ {{  formatNumberToString(form.valor_fipe) }}</p>
                         </v-col>
-                        <v-col cols="12" md="6" lg="4"  class="d-flex" v-if="form.ano_fabricacao && form.ano_modelo">
+                        <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.ano_fabricacao && form.ano_modelo">
                             <p><b>Ano:</b> {{ form.ano_fabricacao }}/{{ form.ano_modelo }}</p>
+                        </v-col>
+                        <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.valorDesejado">
+                            <p><b>Valor Desejado:</b> R$ {{ formatNumberToString(form.valorDesejado) }}</p>
+                        </v-col>
+                        <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.kmRodado">
+                            <p><b>KM:</b> {{ formatNumberToString(form.kmRodado) }}</p>
+                        </v-col>
+                        <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.estadoConservacao">
+                            <p><b>Estado de Conservação:</b> {{ form.estadoConservacao }}</p>
+                        </v-col>
+                        <v-col cols="12" md="6" lg="4" class="d-flex" v-if="form.motivoVenda">
+                            <p><b>Motivo da Venda:</b> {{ form.motivoVenda }}</p>
                         </v-col>
                     </v-row>
                 </v-expansion-panel-text>

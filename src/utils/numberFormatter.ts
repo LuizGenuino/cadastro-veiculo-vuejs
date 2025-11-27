@@ -5,3 +5,9 @@ export function formatStringToNumber(value: string): number {
 
     return parseFloat(numericString) || 0;
 }
+
+export function formatNumberToString(value: string | number): string {
+    const strValue = String(value);
+    const onlyNumber = strValue.replace(/\D/g, '')
+    return onlyNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
