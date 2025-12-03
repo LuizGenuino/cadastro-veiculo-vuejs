@@ -177,7 +177,7 @@ onMounted(async () => {
 
 <template>
     <p class="text-caption text-center" >Novo cadastro em etapa de testes. Caso encontre dificuldades com a placa ou o chassi, retorne à tela anterior e
-        utilize o método atual clicando em “+ Nova Avaliação”.</p>
+        utilize o método atual clicando em “Nova Avaliação”.</p>
     <v-form-card v-model:formVerification="isFormValid" :loading="isLoading" card-title="CADASTRO DE VEÍCULO"
         card-subtitle="Informações básicas do veículo" submit-text="Cadastrar Veículo" @submit.prevent="onSubmit">
         <v-card-subtitle class="page-subtitle text-center mb-6">
