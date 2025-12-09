@@ -4,7 +4,7 @@ import { useLoading } from '@/stores/loading';
 import { useVeiculo } from '@/stores/veiculo';
 import { toast } from '@/utils/swal/toast';
 import { FOTOS_OBRIGATORIAS, type CadastroVeiculoType, type chavesFotosObrigatoriaType, type InfoFotosType, type ObjetoFotoType, } from '@/stores/types';
-import { ref, computed, watch, defineModel } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 

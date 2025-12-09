@@ -7,7 +7,7 @@ import { type CadastroVeiculoType, type FormCamposExtrasType, type FormStateType
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import type { FormInformacoesAdicionaisType, ResponseInformacoesAdicionaisType } from '@/services/http/cadastro-veiculo/types';
-import { formatStringToNumber } from '@/utils/numberFormatter';
+import { formatNumberToString, formatStringToNumber } from '@/utils/numberFormatter';
 
 
 const ESTADOS_CONSERVACAO = [
@@ -80,6 +80,7 @@ async function nextPage(data: ResponseInformacoesAdicionaisType) {
     form.value.observacao = data.observation;
     form.value.etapa_atual = 'imagens-veiculo';
 
+    await veiculoStore.set(form.value as CadastroVeiculoType);
     router.push({ path: `/imagens-veiculo/${veiculoStore.getToken()}` });
 
     return
@@ -150,7 +151,8 @@ onMounted(() => {
         <v-row>
             <v-col cols="12">
                 <v-currency-field v-model:model="formState.valorDesejado" :readonly="isLoading" label="VALOR DESEJADO*"
-                    required prefix="R$" currency :hint="`${form.valor_fipe ? 'Valor Fipe:' + form.valor_fipe : ''}`" />
+                    required prefix="R$" currency
+                    :hint="`${form.valor_fipe ? 'Valor Fipe: R$ ' + formatNumberToString(form.valor_fipe) : ''}`" />
             </v-col>
 
             <v-col cols="12">

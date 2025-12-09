@@ -7,6 +7,7 @@ import { toast } from '@/utils/swal/toast';
 import { FOTOS_OPCIONAIS, type CadastroVeiculoType, type chavesFotosOpcionaisType, type InfoFotosType, type ObjetoFotoType } from '@/stores/types';
 import { useVeiculo } from '@/stores/veiculo';
 import { httpService } from '@/services/http';
+import { useUsuario } from '@/stores/usuario';
 
 const router = useRouter()
 const form = ref<Partial<CadastroVeiculoType>>({});
@@ -19,7 +20,15 @@ const isSuccessModalVisible = ref(false)
 const isLoading = ref(false);
 
 async function nextPage() {
-    await useVeiculo().clear();
+    const veiculoStore = useVeiculo();
+    if (form.value.repasse === true || String(form.value.repasse) === "true") {
+        form.value.etapa_atual = 'cadastro-repasse'
+        await veiculoStore.set(form.value as CadastroVeiculoType);
+        router.push({ path: `/cadastro-repasse/${veiculoStore.getToken()}` })
+        return
+    }
+
+    await veiculoStore.clear();
     toast('Cadastro sem fotos enviado com sucesso!', 'success');
     isSuccessModalVisible.value = true
 }
@@ -46,9 +55,6 @@ function validaImagem(arrayFotos: Array<[chavesFotosOpcionaisType, ObjetoFotoTyp
 
 const onSubmit = async () => {
     try {
-
-        router.push({ path: `/cadastro-repasse/${useVeiculo().getToken()}` })
-        return
         useLoading().show("Enviando Fotos Opcionais...")
         isLoading.value = true;
 
@@ -119,8 +125,6 @@ const onSubmit = async () => {
         if (fotosEnviadas.length < arrayFotos.length) {
             return;
         }
-
-        form.value.etapa_atual = 'imagens-opcionais';
 
         await nextPage();
 

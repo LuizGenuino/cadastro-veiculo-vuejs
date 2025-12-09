@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { CadastroVeiculoType } from '@/stores/types';
 import { formatNumberToString } from '@/utils/numberFormatter';
-import { defineProps } from 'vue'
 
 
 const props = defineProps<{

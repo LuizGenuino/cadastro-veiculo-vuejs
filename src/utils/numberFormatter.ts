@@ -7,7 +7,14 @@ export function formatStringToNumber(value: string): number {
 }
 
 export function formatNumberToString(value: string | number): string {
-    const strValue = String(value);
+    let numberValue: number;
+    if (typeof value === 'string') {
+        numberValue = formatStringToNumber(value);
+    } else {
+        numberValue = value;
+    }
+
+    const strValue = String(numberValue);
     const onlyNumber = strValue.replace(/\D/g, '')
     return onlyNumber.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }

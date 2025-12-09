@@ -10,6 +10,7 @@ import { ROLE_PERMISSOES, type CadastroRepasseType, type CadastroVeiculoType } f
 import type { UserStoresType } from '@/services/http/usuario/types'
 import { useUsuario } from '@/stores/usuario'
 import type { FormRegistroVeiculoType, ResponseVeiculoType } from '@/services/http/cadastro-veiculo/types'
+import { formatNumberToString } from '@/utils/numberFormatter'
 
 const router = useRouter()
 const veiculoStore = useVeiculo()
@@ -46,6 +47,11 @@ function syncronizeData(savedData: Partial<CadastroVeiculoType>) {
         const value = savedData.repasse as string
         form.value.repasse = value.toLowerCase() === 'true'
     }
+
+    formRepasse.value.vehicleId = savedData.id as number
+    formRepasse.value.repasse_tipo = 'COTACAO'
+    formRepasse.value.inicia_em = new Date().toISOString().split('T')[0]
+    formRepasse.value.observacao = savedData.observacao || ''
 }
 
 onMounted(async () => {
@@ -63,7 +69,7 @@ onMounted(async () => {
 
         <v-row>
             <v-col cols="12">
-                <v-select label="CADASTRAR COMO" v-model="formRepasse.repasse_tipo" :items="repasseTipoOptions"
+                <v-select label="CADASTRAR COMO*" v-model="formRepasse.repasse_tipo" :items="repasseTipoOptions"
                     variant="outlined" :readonly="isLoading" :rules="[validators.required]" @update:modelValue="() => {
                         formRepasse.preco_compra = undefined
                         formRepasse.termina_em = undefined
@@ -72,21 +78,27 @@ onMounted(async () => {
 
             <v-col cols="12">
                 <v-currency-field v-model:model="formRepasse.lance_minimo" :readonly="isLoading" label="LANCE MÍNIMO*"
-                    required prefix="R$" currency :hint="`${form.valor_fipe ? 'Valor Fipe:' + form.valor_fipe : ''}`" />
+                    required prefix="R$" currency
+                    :hint="`${form.valorDesejado ? 'Valor Desejado: R$ ' + formatNumberToString(form.valorDesejado) : ''}`" />
             </v-col>
 
             <v-col cols="12" v-if="formRepasse.repasse_tipo === 'COTACAO'">
                 <v-text-field v-model="formRepasse.termina_em" :readonly="isLoading" :loading="isLoading"
-                    :rules="[validators.required]" label="DATA FIM" variant="outlined" type="date" required />
+                    :rules="[validators.required]" label="DATA FIM*" variant="outlined" type="date" required />
             </v-col>
             <v-col cols="12" v-else>
                 <v-select v-model="formRepasse.termina_em" :items="selectHoursOptions" variant="outlined"
-                    label="TEMINA EM" required :readonly="isLoading" :rules="[validators.required]" />
+                    label="TEMINA EM*" required :readonly="isLoading" :rules="[validators.required]" />
             </v-col>
 
             <v-col cols="12" v-if="formRepasse.repasse_tipo === 'REPASSE'">
                 <v-currency-field v-model:model="formRepasse.preco_compra" :readonly="isLoading"
-                    label="PREÇO DE COMPRA*" required prefix="R$" currency />
+                    label="PREÇO DE COMPRA*" required prefix="R$" currency
+                    :hint="`${form.valor_fipe ? 'Valor Fipe: R$ ' + formatNumberToString(form.valor_fipe) : ''}`" />
+            </v-col>
+            <v-col cols="12">
+                <v-textarea label="OBSERVAÇÕES" disabled :readonly="isLoading" v-model="formRepasse.observacao"
+                    variant="outlined" rows="3"></v-textarea>
             </v-col>
         </v-row>
     </v-form-card>
