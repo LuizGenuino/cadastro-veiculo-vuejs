@@ -3,6 +3,7 @@
 import type { CadastroVeiculoType } from '@/stores/types';
 import { useVeiculo } from '@/stores/veiculo';
 
+
 const props = defineProps<{
     form?: Partial<CadastroVeiculoType>
 }>()
@@ -12,6 +13,11 @@ const isModalVisible = defineModel<boolean>('isModalVisible', { default: false }
 function visualizarVeiculo() {
     useVeiculo().clear()
     window.open(`https://app.pitom.com.br/avaliacao/${props.form?.key_uid}`, '_parent');
+}
+
+function visualizarRepasse() {
+    useVeiculo().clear()
+    window.open(`https://app.pitom.com.br/repasse/veiculos/${props.form?.key_uid}`, '_parent');
 }
 
 function cadastrarNovo() {
@@ -32,19 +38,24 @@ function fechar() {
     <v-dialog v-model="isModalVisible" width="90%" max-width="500" class="pa-2" persistent>
         <v-card>
             <v-card-title class="d-flex justify-center align-center">
-                Veiculo Cadastrado!
+                Repasse Cadastrado!
             </v-card-title>
             <v-divider />
 
             <v-card-text class="pa-6 text-center">
-                Você pode visualizar os detalhes do veículo ou cadastrar um novo.
+                Você pode visualizar os detalhes do veículo em Avaliação ou Repasse cadastrar um novo.
             </v-card-text>
             <v-divider />
 
             <v-card-actions class="d-flex justify-space-between pa-4">
-                <v-btn class="rounded-lg text-button" elevation="4" color="info" variant="flat"
+                <v-btn class="rounded-lg text-button" elevation="4" color="success" variant="flat"
                     @click="visualizarVeiculo">
-                    Visualizar
+                    Avaliação
+                </v-btn>
+
+                 <v-btn class="rounded-lg text-button" elevation="4" color="info" variant="flat"
+                    @click="visualizarRepasse">
+                    Repasse
                 </v-btn>
 
                 <v-btn class="rounded-lg text-button" elevation="4" color="warning" variant="flat"

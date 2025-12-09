@@ -43,9 +43,10 @@ export const useVeiculo = defineStore('veiculo', () => {
     }
 
     async function clear() {
+        const token = getToken()
         httpService.limparMemoriaCache()
         state.value = {}
-        await router.replace({ query: {} });
+        await router.replace({ path: `/${token}`, query: {} });
     }
 
     return {

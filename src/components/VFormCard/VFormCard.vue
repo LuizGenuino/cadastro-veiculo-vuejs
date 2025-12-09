@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import { useLoading } from '@/stores/loading';
-import { useUsuario } from '@/stores/usuario';
 import { useVeiculo } from '@/stores/veiculo';
 import { swal } from '@/utils/swal';
-import { defineProps, defineModel, withDefaults } from 'vue'
-import { useRouter } from 'vue-router';
 
-const router = useRouter()
 const loadingStore = useLoading()
 const veiculoStore = useVeiculo()
-const usuarioStore = useUsuario()
 
 const props = withDefaults(defineProps<{
     loading?: boolean
@@ -37,9 +32,7 @@ async function resetForm() {
             return
         }
         loadingStore.show("Limpando dados do Formulario....")
-        await usuarioStore.clear()
         await veiculoStore.clear()
-        router.replace({ path: `/${veiculoStore.getToken()}`, query: {} });
     } catch (error) {
         console.error(error);
     } finally {

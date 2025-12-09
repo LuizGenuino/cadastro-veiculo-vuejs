@@ -20,6 +20,7 @@ const isSuccessModalVisible = ref(false)
 const isLoading = ref(false);
 
 async function nextPage() {
+    form.value.publicado = true
     const veiculoStore = useVeiculo();
     if (form.value.repasse === true || String(form.value.repasse) === "true") {
         form.value.etapa_atual = 'cadastro-repasse'
@@ -28,7 +29,7 @@ async function nextPage() {
         return
     }
 
-    await veiculoStore.clear();
+    await veiculoStore.set(form.value as CadastroVeiculoType)
     toast('Cadastro sem fotos enviado com sucesso!', 'success');
     isSuccessModalVisible.value = true
 }
@@ -141,6 +142,10 @@ const onSubmit = async () => {
 onMounted(() => {
     const data: Partial<CadastroVeiculoType> = useVeiculo().get();
     form.value = { ...data };
+
+     if (data.publicado === true || String(data.publicado).toLowerCase() === 'true') {
+        isSuccessModalVisible.value = true
+    }
 
     if (data.fotos_opcionais && data.fotos_opcionais.length > 0) {
         data.fotos_opcionais.forEach(photoInfo => {

@@ -1,4 +1,5 @@
 import { clearCacheMemory } from "./cache";
+import { HttpCadastroRepasse } from "./cadastro-repasse";
 import { HttpCadastroVeiculo } from "./cadastro-veiculo";
 import { HttpCamposExtras } from "./campos-extras";
 import { HttpUploadImage } from "./uploads-images";
@@ -13,4 +14,5 @@ export const httpService = {
     camposExtras: new HttpCamposExtras(API_PITOM84_URL),
     veiculo: new HttpCadastroVeiculo(API_PITOM84_URL),
     midia: new HttpUploadImage(API_PITOM84_URL),
+    repasse: new HttpCadastroRepasse(API_PITOM84_URL),
 }

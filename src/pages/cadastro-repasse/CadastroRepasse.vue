@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useLoading } from '@/stores/loading'
 import { useVeiculo } from '@/stores/veiculo'
 import { httpService } from '@/services/http'
 import { toast } from '@/utils/swal/toast'
 
-import { ROLE_PERMISSOES, type CadastroRepasseType, type CadastroVeiculoType } from '@/stores/types'
-import type { UserStoresType } from '@/services/http/usuario/types'
-import { useUsuario } from '@/stores/usuario'
-import type { FormRegistroVeiculoType, ResponseVeiculoType } from '@/services/http/cadastro-veiculo/types'
-import { formatNumberToString } from '@/utils/numberFormatter'
+import type { CadastroVeiculoType } from '@/stores/types'
+import { formatNumberToString, formatStringToNumber } from '@/utils/numberFormatter'
+import type { FormRegistroRepasseType } from '@/services/http/cadastro-repasse/types'
+import SuccessDialog from './components/SuccessDialog.vue'
 
-const router = useRouter()
 const veiculoStore = useVeiculo()
 const loadingStore = useLoading()
 
@@ -22,21 +19,73 @@ const selectHoursOptions = [
     { title: '72 horas', value: 72 },
 ]
 
-const repasseTipoOptions = [{ title: 'COTAÇÃO', value: 'COTACAO' }, { title: 'REPASSE', value: 'REPASSE' }]
+const repasseTipoOptions = [{ title: 'COTAÇÃO', value: 'Cotacao' }, { title: 'REPASSE', value: 'Repasse' }]
 
 const form = ref<Partial<CadastroVeiculoType>>({})
 
-const formRepasse = ref<CadastroRepasseType>({} as CadastroRepasseType)
+const formRepasse = ref<FormRegistroRepasseType>({} as FormRegistroRepasseType)
 const isFormValid = ref(false)
 const isLoading = ref(false)
+
+const isSuccessModalVisible = ref(false)
 
 const validators = {
     required: (v: string) => !!v || 'Campo obrigatório',
     minLength: (v: string) => v.length > 3 || "Deve conter no minimo 3 caracteres"
 }
 
+async function nextPage() {
+    const veiculoStore = useVeiculo();
+    await veiculoStore.set(form.value as CadastroVeiculoType)
+    toast('Repasse cadastrado com sucesso!', 'success');
+    isSuccessModalVisible.value = true
+}
+
 async function onSubmit() {
-    console.log('formRepasse', formRepasse.value)
+    if (!isFormValid.value) {
+        toast('Por favor, preencha os campos obrigatórios.', 'warning')
+        return
+    }
+    try {
+        isLoading.value = true
+        loadingStore.show('Cadastrando Repasse...')
+
+        const response = await httpService.repasse.cadastrar(formatFormValue())
+
+        if (response.isRight() && response.value) {
+            form.value.publicado = true
+            await nextPage()
+        }
+
+    } catch (error) {
+        console.error('Falha ao cadastrar repasse:', error)
+        toast('Não foi possível cadastrar o repasse. Tente novamente.', 'error')
+    } finally {
+        loadingStore.hidden()
+        isLoading.value = false
+    }
+}
+
+function formatFormValue(): FormRegistroRepasseType {
+    formRepasse.value.lance_minimo = formatStringToNumber(formRepasse.value.lance_minimo as unknown as string)
+    let dataFim = formRepasse.value.termina_em
+    if (formRepasse.value.repasse_tipo === 'Repasse') {
+        const date = new Date()
+        const hoursToAdd = Number(formRepasse.value.termina_em) ?? 24
+        date.setHours(date.getHours() + hoursToAdd)
+
+        dataFim = date.toISOString().split('T')[0]
+        formRepasse.value.preco_compra = formatStringToNumber(formRepasse.value.preco_compra as unknown as string)
+    }
+
+    if (formRepasse.value.repasse_tipo === 'Cotacao') {
+        formRepasse.value.preco_compra = undefined
+    }
+
+    return {
+        ...formRepasse.value,
+        termina_em: dataFim as string,
+    }
 }
 
 
@@ -49,7 +98,7 @@ function syncronizeData(savedData: Partial<CadastroVeiculoType>) {
     }
 
     formRepasse.value.vehicleId = savedData.id as number
-    formRepasse.value.repasse_tipo = 'COTACAO'
+    formRepasse.value.repasse_tipo = 'Cotacao'
     formRepasse.value.inicia_em = new Date().toISOString().split('T')[0]
     formRepasse.value.observacao = savedData.observacao || ''
 }
@@ -57,6 +106,9 @@ function syncronizeData(savedData: Partial<CadastroVeiculoType>) {
 onMounted(async () => {
     const savedData = veiculoStore.get()
     syncronizeData(savedData)
+    if (savedData.publicado === true || String(savedData.publicado).toLowerCase() === 'true') {
+        isSuccessModalVisible.value = true
+    }
 })
 </script>
 
@@ -70,7 +122,8 @@ onMounted(async () => {
         <v-row>
             <v-col cols="12">
                 <v-select label="CADASTRAR COMO*" v-model="formRepasse.repasse_tipo" :items="repasseTipoOptions"
-                    variant="outlined" :readonly="isLoading" :rules="[validators.required]" @update:modelValue="() => {
+                    variant="outlined" :readonly="isLoading" :loading="isLoading" :rules="[validators.required]"
+                    @update:modelValue="() => {
                         formRepasse.preco_compra = undefined
                         formRepasse.termina_em = undefined
                     }"></v-select>
@@ -82,24 +135,26 @@ onMounted(async () => {
                     :hint="`${form.valorDesejado ? 'Valor Desejado: R$ ' + formatNumberToString(form.valorDesejado) : ''}`" />
             </v-col>
 
-            <v-col cols="12" v-if="formRepasse.repasse_tipo === 'COTACAO'">
+            <v-col cols="12" v-if="formRepasse.repasse_tipo === 'Cotacao'">
                 <v-text-field v-model="formRepasse.termina_em" :readonly="isLoading" :loading="isLoading"
                     :rules="[validators.required]" label="DATA FIM*" variant="outlined" type="date" required />
             </v-col>
             <v-col cols="12" v-else>
                 <v-select v-model="formRepasse.termina_em" :items="selectHoursOptions" variant="outlined"
-                    label="TEMINA EM*" required :readonly="isLoading" :rules="[validators.required]" />
+                    label="TEMINA EM*" required :readonly="isLoading" :loading="isLoading"
+                    :rules="[validators.required]" />
             </v-col>
 
-            <v-col cols="12" v-if="formRepasse.repasse_tipo === 'REPASSE'">
+            <v-col cols="12" v-if="formRepasse.repasse_tipo === 'Repasse'">
                 <v-currency-field v-model:model="formRepasse.preco_compra" :readonly="isLoading"
                     label="PREÇO DE COMPRA*" required prefix="R$" currency
                     :hint="`${form.valor_fipe ? 'Valor Fipe: R$ ' + formatNumberToString(form.valor_fipe) : ''}`" />
             </v-col>
             <v-col cols="12">
-                <v-textarea label="OBSERVAÇÕES" disabled :readonly="isLoading" v-model="formRepasse.observacao"
-                    variant="outlined" rows="3"></v-textarea>
+                <v-textarea label="OBSERVAÇÕES" disabled :readonly="isLoading" :loading="isLoading"
+                    v-model="formRepasse.observacao" variant="outlined" rows="3"></v-textarea>
             </v-col>
         </v-row>
     </v-form-card>
+    <success-dialog :is-modal-visible="isSuccessModalVisible" :form="form"></success-dialog>
 </template>

@@ -6,7 +6,7 @@ import { useVeiculo } from '@/stores/veiculo'
 import { httpService } from '@/services/http'
 import { toast } from '@/utils/swal/toast'
 
-import { ROLE_PERMISSOES, type CadastroVeiculoType } from '@/stores/types'
+import type { CadastroVeiculoType } from '@/stores/types'
 import type { UserStoresType } from '@/services/http/usuario/types'
 import { useUsuario } from '@/stores/usuario'
 import type { FormRegistroVeiculoType, ResponseVeiculoType } from '@/services/http/cadastro-veiculo/types'
@@ -228,7 +228,8 @@ onMounted(async () => {
                     label="TELEFONE DO PROPRIETÁRIO*" required />
             </v-col>
             <v-col cols="12" v-if="repasseAtivo">
-                <v-select label="PUBLICAR COMO REPASSE?" v-model="form.repasse"
+                <v-select label="PUBLICAR COMO REPASSE?" v-model="form.repasse" :readonly="isLoading"
+                    :loading="isLoading"
                     :items="[{ title: 'Sim — Publicar como Avaliação e Repasse', value: true }, { title: 'Não — Publicar apenas como Avaliação', value: false }]"
                     variant="outlined"></v-select>
             </v-col>

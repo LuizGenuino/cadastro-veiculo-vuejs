@@ -72,20 +72,8 @@ export type CadastroVeiculoType = {
     fotos_opcionais: InfoFotosType[];
     lista_veiculos_fipe?: VeiculosFipeType[]
     repasse?: boolean
+    publicado?: boolean
 }
-
-export type CadastroRepasseType = {
-    vehicleId: number;
-    lance_minimo: number;
-    inicia_em: string;
-    termina_em: string | undefined;
-    preco_compra: number | undefined;
-    repasse_tipo: "COTACAO" | "REPASSE";
-    observacao: string | null;
-}
-
-
-
 export interface FormStateType {
     valorDesejado: string;
     kmRodado: string;
