@@ -72,7 +72,6 @@ function ExtraFieldWithOutNullValue(extraFields: Record<string, any>): Record<st
 }
 
 async function nextPage(data: ResponseInformacoesAdicionaisType) {
-    const token = router.currentRoute.value.params as { token?: string }
 
     form.value.valorDesejado = typeof data.desired_value === "number" ? data.desired_value : formatStringToNumber(data.desired_value);
     form.value.kmRodado = data.mileage;
@@ -81,9 +80,7 @@ async function nextPage(data: ResponseInformacoesAdicionaisType) {
     form.value.observacao = data.observation;
     form.value.etapa_atual = 'imagens-veiculo';
 
-    await veiculoStore.set(form.value as CadastroVeiculoType);
-
-    router.push({ path: `/imagens-veiculo/${token.token}` });
+    router.push({ path: `/imagens-veiculo/${veiculoStore.getToken()}` });
 
     return
 }

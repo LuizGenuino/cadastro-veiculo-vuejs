@@ -10,6 +10,7 @@ export const useVeiculo = defineStore('veiculo', () => {
     const router = useRouter()
     const route = useRoute()
     const state = ref<Partial<CadastroVeiculoType>>({})
+    const token = router.currentRoute.value.params as { token?: string }
 
     function get(): CadastroVeiculoType {
         if (route.query && Object.keys(route.query).length > 0) {
@@ -29,6 +30,10 @@ export const useVeiculo = defineStore('veiculo', () => {
         return state.value as CadastroVeiculoType;
     }
 
+    function getToken(): string {
+        return token.token || '';
+    }
+
     async function set(data: Partial<CadastroVeiculoType>) {
         state.value = { ...state.value, ...data }
 
@@ -45,6 +50,7 @@ export const useVeiculo = defineStore('veiculo', () => {
 
     return {
         get,
+        getToken,
         set,
         clear
     }

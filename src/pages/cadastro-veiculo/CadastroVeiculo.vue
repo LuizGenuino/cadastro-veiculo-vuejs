@@ -6,7 +6,7 @@ import { useVeiculo } from '@/stores/veiculo'
 import { httpService } from '@/services/http'
 import { toast } from '@/utils/swal/toast'
 
-import type { CadastroVeiculoType } from '@/stores/types'
+import { ROLE_PERMISSOES, type CadastroVeiculoType } from '@/stores/types'
 import type { UserStoresType } from '@/services/http/usuario/types'
 import { useUsuario } from '@/stores/usuario'
 import type { FormRegistroVeiculoType, ResponseVeiculoType } from '@/services/http/cadastro-veiculo/types'
@@ -16,6 +16,7 @@ const loadingStore = useLoading()
 const veiculoStore = useVeiculo()
 
 const form = ref<Partial<CadastroVeiculoType>>({})
+const repasseAtivo = ref<boolean>(false)
 const lojasUsuario = ref<UserStoresType[]>([])
 const selectedStore = ref<UserStoresType | null>(null)
 const isFormValid = ref(false)
@@ -46,13 +47,13 @@ function clearForm() {
 
 async function nextPage(data: ResponseVeiculoType) {
     clearForm()
+    const token = veiculoStore.getToken()
 
     form.value.id = data.id
     form.value.id_loja_usuario = data.store_id
     form.value.nome_loja_usuario = data.store_name
     form.value.short_id = data.short_id
     form.value.key_uid = data.key_uid
-    const token = router.currentRoute.value.params as { token?: string }
     form.value.etapa_atual = 'informacao-veiculo'
 
     if (data.fipes === null) {
@@ -63,7 +64,7 @@ async function nextPage(data: ResponseVeiculoType) {
         form.value.placa = data.plate || undefined
         form.value.chassi = data.chassis || undefined
         await veiculoStore.set(form.value as CadastroVeiculoType)
-        router.push({ path: `/informacao-veiculo/${token.token}` });
+        router.push({ path: `/informacao-veiculo/${token}` });
         return
     }
 
@@ -78,7 +79,7 @@ async function nextPage(data: ResponseVeiculoType) {
         form.value.placa = data.plate
         form.value.chassi = data.chassis
         await veiculoStore.set(form.value as CadastroVeiculoType)
-        router.push({ path: `/informacao-veiculo/${token.token}` });
+        router.push({ path: `/informacao-veiculo/${token}` });
         return
     }
 
@@ -86,7 +87,7 @@ async function nextPage(data: ResponseVeiculoType) {
         form.value.lista_veiculos_fipe = data.fipes
         form.value.etapa_atual = 'selecionar-veiculo'
         await veiculoStore.set(form.value as CadastroVeiculoType)
-        router.push({ path: `/selecionar-veiculo/${token.token}` })
+        router.push({ path: `/selecionar-veiculo/${token}` })
         return
 
     }
@@ -130,26 +131,33 @@ async function fetchUserStores() {
     loadingStore.show('Carregando suas lojas...')
 
     try {
-        const usuario = useUsuario().get()
+
+        let usuario = useUsuario().get()
+        let repasse = useUsuario().repasse()
 
         if (usuario.user_stores && usuario.user_stores.length > 0) {
             lojasUsuario.value = usuario.user_stores
+            repasseAtivo.value = repasse
             return
         }
 
         const response = await httpService.usuario.usuarioAtual()
 
-        if (response.isRight()) {
-
-            useUsuario().set(response.value || {})
-            const userData = response.value
-            lojasUsuario.value = userData?.user_stores ?? []
-
-            if (!lojasUsuario.value.length) {
-                toast('Usuário não possui lojas vinculadas. Contate o suporte!.', 'error')
-                return
-            }
+        if (response.isLeft() && !response.value) {
+            return
         }
+        useUsuario().set(response.value || {})
+        usuario = response.value
+        lojasUsuario.value = usuario?.user_stores ?? []
+
+        if (!lojasUsuario.value.length) {
+            toast('Usuário não possui lojas vinculadas. Contate o suporte!.', 'error')
+            return
+        }
+
+        repasse = useUsuario().repasse()
+        repasseAtivo.value = repasse
+
     } catch (error) {
         console.error('Erro ao buscar dados do usuário:', error)
         toast('Não foi possível carregar os dados do usuário.', 'error')
@@ -163,20 +171,33 @@ async function fetchUserStores() {
     }
 }
 
-onMounted(async () => {
-    await fetchUserStores()
-    const savedData = veiculoStore.get()
+function syncronizeData(savedData: Partial<CadastroVeiculoType>) {
     form.value = { ...savedData }
 
     if (savedData.id_loja_usuario && lojasUsuario.value.length) {
         selectedStore.value =
             lojasUsuario.value.find(loja => loja.id == savedData.id_loja_usuario) || null
     }
+    if (savedData.repasse === undefined) {
+        form.value.repasse = repasseAtivo.value
+    } else {
+        if (typeof savedData.repasse === 'string') {
+            const value = savedData.repasse as string
+            form.value.repasse = value.toLowerCase() === 'true'
+        }
+    }
+}
+
+onMounted(async () => {
+    await fetchUserStores()
+    const savedData = veiculoStore.get()
+    syncronizeData(savedData)
 })
 </script>
 
 <template>
-    <p class="text-caption text-center" >Novo cadastro em etapa de testes. Caso encontre dificuldades com a placa ou o chassi, retorne à tela anterior e
+    <p class="text-caption text-center">Novo cadastro em etapa de testes. Caso encontre dificuldades com a placa ou o
+        chassi, retorne à tela anterior e
         utilize o método atual clicando em “Nova Avaliação”.</p>
     <v-form-card v-model:formVerification="isFormValid" :loading="isLoading" card-title="CADASTRO DE VEÍCULO"
         card-subtitle="Informações básicas do veículo" submit-text="Cadastrar Veículo" @submit.prevent="onSubmit">
@@ -205,6 +226,11 @@ onMounted(async () => {
             <v-col cols="12">
                 <v-phone-field v-model:model="form.telefone_proprietario" :loading="isLoading"
                     label="TELEFONE DO PROPRIETÁRIO*" required />
+            </v-col>
+            <v-col cols="12" v-if="repasseAtivo">
+                <v-select label="PUBLICAR COMO REPASSE?" v-model="form.repasse"
+                    :items="[{ title: 'Sim — Publicar como Avaliação e Repasse', value: true }, { title: 'Não — Publicar apenas como Avaliação', value: false }]"
+                    variant="outlined"></v-select>
             </v-col>
         </v-row>
     </v-form-card>

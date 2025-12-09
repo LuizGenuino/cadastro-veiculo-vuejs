@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import type { CadastroVeiculoType } from '@/stores/types';
+import { useVeiculo } from '@/stores/veiculo';
 import { defineModel } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -17,9 +18,8 @@ function visualizarVeiculo() {
 }
 
 function cadastrarNovo() {
-    const token = router.currentRoute.value.params as { token?: string }
 
-    router.replace({ path: `/${token.token}` });
+    router.replace({ path: `/${useVeiculo().getToken()}` });
 }
 
 function fechar() {

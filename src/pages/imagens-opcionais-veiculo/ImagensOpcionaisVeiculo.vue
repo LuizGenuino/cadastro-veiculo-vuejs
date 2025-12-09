@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
-
+import { useRouter } from 'vue-router'
 import SuccessDialog from './components/SuccessDialog.vue';
 import { useLoading } from '@/stores/loading';
 import { toast } from '@/utils/swal/toast';
@@ -8,7 +8,7 @@ import { FOTOS_OPCIONAIS, type CadastroVeiculoType, type chavesFotosOpcionaisTyp
 import { useVeiculo } from '@/stores/veiculo';
 import { httpService } from '@/services/http';
 
-
+const router = useRouter()
 const form = ref<Partial<CadastroVeiculoType>>({});
 
 const fotos = ref<Partial<Record<chavesFotosOpcionaisType, ObjetoFotoType>>>({});
@@ -46,6 +46,9 @@ function validaImagem(arrayFotos: Array<[chavesFotosOpcionaisType, ObjetoFotoTyp
 
 const onSubmit = async () => {
     try {
+
+        router.push({ path: `/cadastro-repasse/${useVeiculo().getToken()}` })
+        return
         useLoading().show("Enviando Fotos Opcionais...")
         isLoading.value = true;
 

@@ -12,6 +12,7 @@ import { SelecionarVeiculoRoute } from '@/pages/selecionar-veiculo/route'
 import { InformacaoVeiculoRoute } from '@/pages/informacao-veiculo/route'
 import { ImagensVeiculoRoute } from '@/pages/imagens-veiculo/route'
 import { ImagensOpcionaisVeiculoRoute } from '@/pages/imagens-opcionais-veiculo/route'
+import { CadastroRepasseRoute } from '@/pages/cadastro-repasse/route'
 
 
 const router = createRouter({
@@ -22,6 +23,7 @@ const router = createRouter({
         InformacaoVeiculoRoute,
         ImagensVeiculoRoute,
         ImagensOpcionaisVeiculoRoute,
+        CadastroRepasseRoute,
         // Not Found route should be the last one
         NotFoundRoute
     ],

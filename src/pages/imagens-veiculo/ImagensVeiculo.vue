@@ -36,10 +36,7 @@ watch(todasFotosEnviadas, (newValue) => {
 async function nextPage() {
     toast('Imagens cadastradas com sucesso!', 'success');
     await useVeiculo().set(form.value as CadastroVeiculoType);
-    const { token } = router.currentRoute.value.params as { token?: string };
-    if (token) {
-        router.push({ path: `/imagens-opcionais/${token}` });
-    }
+        router.push({ path: `/imagens-opcionais/${useVeiculo().getToken()}` });
 }
 
 function validaImagem(arrayFotos: Array<[chavesFotosObrigatoriaType, ObjetoFotoType | undefined]>): "valid" | "alreadyUploaded" | "invalid" {

@@ -30,7 +30,6 @@ const precoFormatado = computed<number>(() => {
 });
 
 async function nextPage(data: ResponseVeiculoType) {
-    const token = router.currentRoute.value.params as { token?: string }
     form.value.etapa_atual = 'informacao-veiculo'
     form.value.id_veiculo_fipe = veiculoSelecionado.value?.id
     form.value.codigo_fipe = data.fipe_code
@@ -44,7 +43,7 @@ async function nextPage(data: ResponseVeiculoType) {
 
     await veiculoStore.set(form.value as CadastroVeiculoType)
 
-    router.push({ path: `/informacao-veiculo/${token.token}` });
+    router.push({ path: `/informacao-veiculo/${veiculoStore.getToken()}` });
     return
 }
 

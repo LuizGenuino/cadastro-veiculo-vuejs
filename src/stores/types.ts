@@ -16,6 +16,8 @@ export const FOTOS_OPCIONAIS = {
     motor: { titulo: 'Motor', fileName: 'Motor', icon: 'mdi-engine' }
 } as const;
 
+export const ROLE_PERMISSOES = ["Sudo", "Administrador"]
+
 export type chavesFotosObrigatoriaType = keyof typeof FOTOS_OBRIGATORIAS;
 
 export type chavesFotosOpcionaisType = keyof typeof FOTOS_OPCIONAIS;
@@ -69,6 +71,17 @@ export type CadastroVeiculoType = {
     fotos_obrigatorias: InfoFotosType[];
     fotos_opcionais: InfoFotosType[];
     lista_veiculos_fipe?: VeiculosFipeType[]
+    repasse?: boolean
+}
+
+export type CadastroRepasseType = {
+    vehicleId: number;
+    lance_minimo: number;
+    inicia_em: string;
+    termina_em: string | undefined;
+    preco_compra: number | undefined;
+    repasse_tipo: "COTACAO" | "REPASSE";
+    observacao: string | null;
 }
 
 

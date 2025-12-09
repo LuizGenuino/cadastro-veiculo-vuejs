@@ -39,8 +39,7 @@ async function resetForm() {
         loadingStore.show("Limpando dados do Formulario....")
         await usuarioStore.clear()
         await veiculoStore.clear()
-        const token = router.currentRoute.value.params as { token?: string }
-        router.replace({ path: `/${token.token}`, query: {} });
+        router.replace({ path: `/${veiculoStore.getToken()}`, query: {} });
     } catch (error) {
         console.error(error);
     } finally {
