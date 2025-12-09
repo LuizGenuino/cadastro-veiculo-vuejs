@@ -1,4 +1,4 @@
-import type { NavigationGuardNext, RouteLocationNormalizedGeneric, RouteLocationNormalizedLoadedGeneric, Router, RouteRecordRaw } from "vue-router";
+import type { RouteRecordRaw } from "vue-router";
 
 export const CadastroRepasseRoute: RouteRecordRaw = {
     path: '/cadastro-repasse/:token([A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+)',
@@ -12,11 +12,3 @@ export const CadastroRepasseRoute: RouteRecordRaw = {
         }
     ]
 }
-
-type Input = {
-    next: NavigationGuardNext
-    router: Router
-    from: RouteLocationNormalizedLoadedGeneric
-    to: RouteLocationNormalizedGeneric
-}
-
