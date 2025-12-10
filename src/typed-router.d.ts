@@ -19,6 +19,7 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/cadastro-repasse/CadastroRepasse': RouteRecordInfo<'/cadastro-repasse/CadastroRepasse', '/cadastro-repasse/CadastroRepasse', Record<never, never>, Record<never, never>>,
+    '/cadastro-repasse/components/SuccessDialog': RouteRecordInfo<'/cadastro-repasse/components/SuccessDialog', '/cadastro-repasse/components/SuccessDialog', Record<never, never>, Record<never, never>>,
     '/cadastro-veiculo/CadastroVeiculo': RouteRecordInfo<'/cadastro-veiculo/CadastroVeiculo', '/cadastro-veiculo/CadastroVeiculo', Record<never, never>, Record<never, never>>,
     '/imagens-opcionais-veiculo/components/SuccessDialog': RouteRecordInfo<'/imagens-opcionais-veiculo/components/SuccessDialog', '/imagens-opcionais-veiculo/components/SuccessDialog', Record<never, never>, Record<never, never>>,
     '/imagens-opcionais-veiculo/ImagensOpcionaisVeiculo': RouteRecordInfo<'/imagens-opcionais-veiculo/ImagensOpcionaisVeiculo', '/imagens-opcionais-veiculo/ImagensOpcionaisVeiculo', Record<never, never>, Record<never, never>>,

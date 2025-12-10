@@ -20,7 +20,6 @@ const isSuccessModalVisible = ref(false)
 const isLoading = ref(false);
 
 async function nextPage() {
-    form.value.publicado = true
     const veiculoStore = useVeiculo();
     if (form.value.repasse === true || String(form.value.repasse) === "true") {
         form.value.etapa_atual = 'cadastro-repasse'
@@ -28,7 +27,7 @@ async function nextPage() {
         router.push({ path: `/cadastro-repasse/${veiculoStore.getToken()}` })
         return
     }
-
+    form.value.publicado = true
     await veiculoStore.set(form.value as CadastroVeiculoType)
     toast('Cadastro sem fotos enviado com sucesso!', 'success');
     isSuccessModalVisible.value = true
@@ -143,7 +142,7 @@ onMounted(() => {
     const data: Partial<CadastroVeiculoType> = useVeiculo().get();
     form.value = { ...data };
 
-     if (data.publicado === true || String(data.publicado).toLowerCase() === 'true') {
+    if (data.publicado === true || String(data.publicado).toLowerCase() === 'true') {
         isSuccessModalVisible.value = true
     }
 
