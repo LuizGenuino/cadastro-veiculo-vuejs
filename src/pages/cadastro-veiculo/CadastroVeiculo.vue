@@ -54,6 +54,7 @@ async function nextPage(data: ResponseVeiculoType) {
     form.value.nome_loja_usuario = data.store_name
     form.value.short_id = data.short_id
     form.value.key_uid = data.key_uid
+    form.value.repasse = data.is_repasse
     form.value.etapa_atual = 'informacao-veiculo'
 
     if (data.fipes === null) {
@@ -106,6 +107,7 @@ async function onSubmit() {
             store_id: selectedStore.value?.id ?? 0,
             vehicle: form.value.placa_ou_chassi ?? '',
             type_vehicle: (form.value.placa_ou_chassi ?? '').length < 9 ? "PLATE" : "CHASSIS",
+            is_repasse: form.value.repasse ?? false
         }
 
         isLoading.value = true

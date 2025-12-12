@@ -6,6 +6,7 @@ export type FormRegistroVeiculoType = {
     store_id: number,
     vehicle: string,
     type_vehicle: string,
+    is_repasse: boolean
 }
 
 export type FormSelecaoVeiculoFipeType = {
@@ -59,6 +60,8 @@ export type ResponseVeiculoType = {
     conservation_state: string,
     registration_notes: string,
     sale_reason: string,
+    is_repasse: boolean,
+    repasse_posted: boolean,
     fipes: VeiculosFipeType[] | null,
     created_at: string,
     updated_at: string,
