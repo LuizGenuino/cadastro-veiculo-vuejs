@@ -24,7 +24,6 @@ export type FormInformacoesAdicionaisType = {
     conservation_state: string,
     sale_reason: string,
     observation: string | null
-    extra_fields: Record<string, FormCamposExtrasType>
 }
 
 export type ResponseVeiculoType = {

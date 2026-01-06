@@ -1,3 +1,5 @@
+import type { FormCamposExtrasType } from "@/stores/types"
+
 export type ResponseCamposExtrasType = {
     isArray: boolean,
     length: number,
@@ -45,10 +47,27 @@ export type ValidationType = {
     pattern: string | null
 }
 
+export type FormDadosExtrasType = {
+    vehicle_uid: string,
+    extra_fields: Record<string, FormCamposExtrasType>
+}
 
+export type ResponseDadosExtrasType = {
+    extra_fields: ExtraFieldsType[]
+}
 
-
-
-
-
+export type ExtraFieldsType = {
+    id: number,
+    vehicle_id: number,
+    config_id: number,
+    text_value: string,
+    numeric_value: number,
+    boolean_value: true,
+    date_value: string,
+    time_value: string,
+    json_value: any,
+    created_at: string,
+    updated_at: string,
+    updated_by: number
+}
 

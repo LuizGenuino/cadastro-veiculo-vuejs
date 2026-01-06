@@ -8,6 +8,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import type { FormInformacoesAdicionaisType, ResponseInformacoesAdicionaisType } from '@/services/http/cadastro-veiculo/types';
 import { formatNumberToString, formatStringToNumber } from '@/utils/numberFormatter';
+import type { FormDadosExtrasType } from '@/services/http/campos-extras/types';
 
 
 const ESTADOS_CONSERVACAO = [
@@ -96,6 +97,11 @@ async function onSubmit() {
     try {
         isLoading.value = true
         loadingStore.show("Salvando Informações Extras...")
+        
+        const formDadosExtras: FormDadosExtrasType = {
+            vehicle_uid: form.value.key_uid || '',
+            extra_fields: ExtraFieldWithOutNullValue(form.value.campos_extras || {}),
+        }
 
         const formVeiculo: FormInformacoesAdicionaisType = {
             vehicle_id: Number(form.value.id) || 0,
@@ -103,14 +109,14 @@ async function onSubmit() {
             mileage: formatStringToNumber(formState.kmRodado),
             conservation_state: formState.estadoConservacao,
             sale_reason: formState.motivoVenda,
-            observation: formState.observacao,
-            extra_fields: ExtraFieldWithOutNullValue(form.value.campos_extras || {}),
+            observation: formState.observacao
         }
 
-        const response = await httpService.veiculo.cadastrarDadosExtras(formVeiculo);
-
-        if (response.isRight() && response.value) {
-            await nextPage(response.value)
+        const response = await httpService.veiculo.cadastrarInformacoesAdicionais(formVeiculo);
+        const dadosExtras = await httpService.camposExtras.cadastrarDadosExtras(formDadosExtras);
+        
+        if (response.isRight() && dadosExtras.isRight() && response.value && dadosExtras.value) {
+            await nextPage({...response.value, extra_fields: dadosExtras.value.extra_fields});
         }
 
     } catch (error) {

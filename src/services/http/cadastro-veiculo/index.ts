@@ -29,9 +29,9 @@ export class HttpCadastroVeiculo extends HttpBase {
         }
     }
 
-    async cadastrarDadosExtras(form: FormInformacoesAdicionaisType): Promise<Either<null, ResponseInformacoesAdicionaisType>> {
+    async cadastrarInformacoesAdicionais(form: FormInformacoesAdicionaisType): Promise<Either<null, ResponseInformacoesAdicionaisType>> {
         try {
-            const response = await this.http.post(`${this.resource}/extra-fields/insert-data`, form)
+            const response = await this.http.post(`${this.resource}/additional-data`, form)
             return Right.create(response.data.data)
         } catch {
             return Left.create(null)
